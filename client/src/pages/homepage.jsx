@@ -1,14 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { IoSettingsSharp } from "react-icons/io5";
 
 function Homepage(param) {
-  console.log("testing: ", param.settingsParam)
   const [address, setAddress] = useState("");
   const [latestSearch, setLatestSearch] = useState(() => {
     const savedSearches = localStorage.getItem("latestSearches");
     return savedSearches ? JSON.parse(savedSearches) : [];
   });
+  const [settings, setSettings] = useState(false)
   const [hereId, setHereId] = useState('input-wallet')
+
+  const [totalTransactions, setTotalTransactions] = useState('1000')
+  const [miniumumTransactionValue, setMinumumTransactionValue] = useState('10')
+  const [minimumEqualTransactions, setMinimumEqualTransactions] = useState('3')
+  const [minimumValueEqualTransactions, setMinimumValueEqualTransactions] = useState('1')
+  const [settingsParam, setSettingsParam] = useState({});
+
+
+  useEffect(() => {
+    setSettingsParam({
+      total_tx: totalTransactions,
+      min_tx_value: miniumumTransactionValue,
+      min_eq_tx: minimumEqualTransactions,
+      min_eq_value_tx: minimumValueEqualTransactions
+  });
+  }, [totalTransactions, miniumumTransactionValue, minimumEqualTransactions, minimumValueEqualTransactions]);
+
+
 
   const navigate = useNavigate();
 
@@ -31,10 +50,8 @@ function Homepage(param) {
       document.removeEventListener('keydown', keyEnter);
     };
   }, [address])
-
+  
   const handleSearch = (valueButton) => {
-    console.log("körd")
-    console.log("address: ", address)
     if (address == "" && valueButton == null) {
       setHereId('input-wallet-wrong');
       setTimeout(() => {
@@ -42,12 +59,8 @@ function Homepage(param) {
       }, 1000);
       return
     }
-    const params = new URLSearchParams({
-      param1: '1000',
-      param2: '5',
-      param3: '2',
-      param4: '3'
-    });
+    const params = new URLSearchParams(settingsParam);
+
     if (valueButton == null) {
       setLatestSearch(prevSearches => {
         let updatedSearches = [...prevSearches, address];
@@ -72,12 +85,38 @@ function Homepage(param) {
     }
   }
 
-
-
   return (
     <>
       <div id="main-page">
         <div id="search-bar">
+          <IoSettingsSharp id="settings-icon" style={settings ? { color: "#646cff" } : { color: "white" }} onClick={()=> setSettings(settings ? false : true)}/>
+          {settings && <div id="settings">
+            <div id="settings-body">
+              <div id="settings-main">
+                <div id="settings-main-head">
+                  <h2>Search settings</h2>
+                </div>
+                <div id="settings-main-content">
+                  <div>
+                    <h3>Total amount of transactions to fetch</h3>
+                    <input type="search" id="test" value={totalTransactions} placeholder="Ex. 1000" onChange={(e) => setTotalTransactions(e.target.value)} />
+                  </div>
+                  <div>
+                    <h3>Minimum value of each fetched transaktion</h3>
+                    <input type="search" value={miniumumTransactionValue} placeholder="Ex. 10" onChange={(e) => setMinumumTransactionValue(e.target.value)} />
+                  </div>
+                  <div>
+                    <h3>Amount of equal sent transaction from each found wallets</h3>
+                    <input type="search" value={minimumEqualTransactions} placeholder="Ex. 3" onChange={(e) => setMinimumEqualTransactions(e.target.value)} />
+                  </div>
+                  <div>
+                    <h3>Minimum value of each equal transaction out</h3>
+                    <input type="search" value={minimumValueEqualTransactions} placeholder="Ex. 1" onChange={(e) => setMinimumValueEqualTransactions(e.target.value)} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>}
           <div id="search-func">
             <h2>Enter dex wallet</h2>
             <input type="search" value={address} id={hereId} placeholder="Enter A Solana address" onChange={(e) => setAddress(e.target.value)} />

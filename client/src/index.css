@@ -272,6 +272,31 @@ button:hover {
   color: grey
 }
 
+#main-page{
+  #settings-icon{
+    color: white;
+    font-size: 25px;
+    position: absolute;
+    margin-top: 10px;
+    right:11vw;
+    z-index: 2;
+  }
+  #settings-icon:hover {
+    color: #646cff;
+  }
+
+  #settings{
+    position: absolute;
+    height: 70%;
+    width: 80%;
+    margin: 0;
+    background-color: #131313;
+    border-radius: 10px;
+    z-index: 1;
+  }
+
+}
+
 
 
 
