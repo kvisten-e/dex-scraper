@@ -11,25 +11,28 @@ function Homepage(param) {
   const [settings, setSettings] = useState(false)
   const [hereId, setHereId] = useState('input-wallet')
 
-  const [totalTransactions, setTotalTransactions] = useState('1000')
-  const [miniumumTransactionValue, setMinumumTransactionValue] = useState('10')
-  const [minimumEqualTransactions, setMinimumEqualTransactions] = useState('3')
-  const [minimumValueEqualTransactions, setMinimumValueEqualTransactions] = useState('1')
+  const [totalTransactions, setTotalTransactions] = useState(() => localStorage.getItem('totalTransactions') || '1000');
+  const [miniumumTransactionValue, setMinumumTransactionValue] = useState(() => localStorage.getItem('miniumumTransactionValue') || '10');
+  const [minimumEqualTransactions, setMinimumEqualTransactions] = useState(() => localStorage.getItem('minimumEqualTransactions') || '3');
+  const [minimumValueEqualTransactions, setMinimumValueEqualTransactions] = useState(() => localStorage.getItem('minimumValueEqualTransactions') || '1');
   const [settingsParam, setSettingsParam] = useState({});
-
+  const navigate = useNavigate();
 
   useEffect(() => {
-    setSettingsParam({
+    const newSettingsParam = {
       total_tx: totalTransactions,
       min_tx_value: miniumumTransactionValue,
       min_eq_tx: minimumEqualTransactions,
       min_eq_value_tx: minimumValueEqualTransactions
-  });
+    };
+
+    setSettingsParam(newSettingsParam);
+
+    localStorage.setItem('totalTransactions', totalTransactions);
+    localStorage.setItem('miniumumTransactionValue', miniumumTransactionValue);
+    localStorage.setItem('minimumEqualTransactions', minimumEqualTransactions);
+    localStorage.setItem('minimumValueEqualTransactions', minimumValueEqualTransactions);
   }, [totalTransactions, miniumumTransactionValue, minimumEqualTransactions, minimumValueEqualTransactions]);
-
-
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     localStorage.setItem("latestSearches", JSON.stringify(latestSearch));
@@ -51,8 +54,33 @@ function Homepage(param) {
     };
   }, [address])
   
+
+  const checkAddress = (valueButton) => {
+    const base58Chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    let wallet = ""
+    if (valueButton == null) {
+      wallet = address
+    } else {
+      wallet = valueButton
+    }
+
+    const walletLength = 44
+    if (wallet.length !== walletLength) {
+      return true;
+    }
+    for (let i = 0; i < wallet.length; i++) {
+      if (!base58Chars.includes(wallet[i])) {
+        return true;
+      }
+    }
+    return false
+  }
+
   const handleSearch = (valueButton) => {
-    if (address == "" && valueButton == null) {
+    const walletToCheck = valueButton || address
+    console.log(walletToCheck)
+    if (!walletToCheck || checkAddress(valueButton)) {
+      console.log("inne")
       setHereId('input-wallet-wrong');
       setTimeout(() => {
         setHereId('input-wallet');
@@ -84,6 +112,7 @@ function Homepage(param) {
       }, 10)
     }
   }
+
 
   return (
     <>
@@ -139,6 +168,12 @@ function Homepage(param) {
       </div>
     </>
   );
+}
+
+
+function checkAddress(wallet) {
+  
+  return false
 }
 
 export default Homepage;
