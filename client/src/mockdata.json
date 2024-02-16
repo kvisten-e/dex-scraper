@@ -1,0 +1,56 @@
+{
+  "main-wallet": "G6f2Ai7rpe5XvS5KAJcZFT3pwSui1xUUNe5D7XdH221p",
+  "amount-transactions": 4,
+  "found-wallets": {
+    "6jzXYZiLCzLpqhonqQFqhUHtV1LnMMbrs8PA1kmdYRdH": {
+      "received-amount": 10,
+      "found-wallets-bots": {
+        "received-amount-bot": 1,
+        "receiving-wallets": {
+          "1": "FdtaYYo7Q9izUtEjqiw1DYDRnwJTRq5No5f2vVkJhaUy",
+          "2": "uoYRZYhFgoboE5p34FKAZp6a4VBJcpQ4j1UyGok6RC5",
+          "3": "mDA6NSjMKgbNkvJa9yacLMuYJXJfgtJCSuiE2htjyp1"
+        }
+      }
+    },
+    "L5Zw6CoP6kqBR4sjgh4Cwq2gVXJriVwJ9fLyjPGhsPg": {
+      "received-amount": 17,
+      "found-wallets-bots": {
+        "received-amount-bot": 1.5,
+        "receiving-wallets": {
+          "1": "99GqAMThJPxsBQqvr34ETD4DugFCxapAG8PtW9z3bPHQ",
+          "2": "AzKMo13Hotd6bG7fSjJbuXa3MsDsJB4h97aavDjxaxSU",
+          "3": "spLBjynYsG7b7e7B2t7xdULDmQ9Bbf3RbSeMHUpqoJ2",
+          "4": "3Re9sGYa2DmvZENX7bJbcAQCb3P8fkMuwAv4De5tT7LG",
+          "5": "B4SxLSBcVH188ssSd7Ng5VvPD4Y9gU8CQWZvgxsaenPZ"
+        }
+      }
+    },
+    "C2nstz3QRysyWPexJyjsFf9diS3dzTAkAELMMYbqiXqv": {
+      "received-amount": 20,
+      "found-wallets-bots": {
+        "received-amount-bot": 2,
+        "receiving-wallets": {
+          "1": "JA7bEsUZLx1dppytqYGSXu8ZdXX1ce9Qp3egYh1W9sho",
+          "2": "C8Jk1VdFzwmESBuRn55LHWKAMbZv6FCA3vCUXKoLdFXe",
+          "3": "5rEY5gkeBoLkyVf9UnPTbqgQcZne41u7S6h5ZZr2Jrxi",
+          "4": "ChvWhFWBTMJv6ZhSMuypWDNKRTicuatnBmz2mX4qVTGr",
+          "5": "8LDJ3Cgc565mbpJg6Fq7cxCyq2XENBxqYNennszfiMag"
+        }
+      }
+    },
+    "6BadcfhLa2i3zJesAEgzKya4A8qFpXqr8f41qvozXr91": {
+      "received-amount": 23,
+      "found-wallets": {
+        "received-amount-bot": 2,
+        "receiving-wallets": {
+          "1": "JA7bEsUZLx1dppytqYGSXu8ZdXX1ce9Qp3egYh1W9sho",
+          "2": "C8Jk1VdFzwmESBuRn55LHWKAMbZv6FCA3vCUXKoLdFXe",
+          "3": "5rEY5gkeBoLkyVf9UnPTbqgQcZne41u7S6h5ZZr2Jrxi",
+          "4": "ChvWhFWBTMJv6ZhSMuypWDNKRTicuatnBmz2mX4qVTGr",
+          "5": "8LDJ3Cgc565mbpJg6Fq7cxCyq2XENBxqYNennszfiMag"
+        }        
+      }
+    }
+  }
+}
