@@ -1,42 +1,37 @@
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { main } from '../components/fetchDataWallet.js';
 
 function ShowWallet() {
 
   const { address } = useParams();
   const getParams = new URLSearchParams(document.location.search)
-  const [data, setData] = useState({})
   const [params, setParams] = useState([])
-
+  const [data] = useState([])
 
 
   useEffect(() => {
-    async function load() {
-      const response = await fetch('/mockdata.json')
-      const data = await response.json()
-      setData(data.foundWallets)
-    }
-    load()
 
-    const params = [
+    const paramsData = [
       { "total_tx": getParams.get("total_tx") },
       { "min_tx_value": getParams.get("min_tx_value") },
       { "min_eq_tx": getParams.get("min_eq_tx") },
       { "min_eq_value_tx": getParams.get("min_eq_value_tx") },
+      { "total_min_tx": getParams.get("total_min_tx") },
+
     ]
-    setParams(params)
+    setParams(paramsData)
+
+    const dataChain = main(address, paramsData)
+    console.log(dataChain)
+
   }, [])
 
-  console.log("data: ", data)
 
   return (
     <>
       <h1>Address: {address}</h1>
-      {Object.keys(data).map(([key, value]) => {
-        <section>
-          <p>Wallet: {key}</p>
-        </section>
-      })}
+
     </>
   )
 }

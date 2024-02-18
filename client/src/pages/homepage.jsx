@@ -15,6 +15,7 @@ function Homepage(param) {
   const [miniumumTransactionValue, setMinumumTransactionValue] = useState(() => localStorage.getItem('miniumumTransactionValue') || '10');
   const [minimumEqualTransactions, setMinimumEqualTransactions] = useState(() => localStorage.getItem('minimumEqualTransactions') || '3');
   const [minimumValueEqualTransactions, setMinimumValueEqualTransactions] = useState(() => localStorage.getItem('minimumValueEqualTransactions') || '1');
+  const [totalMinimumTransactions, setTotalMinimumTransactions] = useState(() => localStorage.getItem('totalMinimumTransactions') || '1')
   const [settingsParam, setSettingsParam] = useState({});
   const navigate = useNavigate();
 
@@ -23,7 +24,8 @@ function Homepage(param) {
       total_tx: totalTransactions,
       min_tx_value: miniumumTransactionValue,
       min_eq_tx: minimumEqualTransactions,
-      min_eq_value_tx: minimumValueEqualTransactions
+      min_eq_value_tx: minimumValueEqualTransactions,
+      total_min_tx: totalMinimumTransactions
     };
 
     setSettingsParam(newSettingsParam);
@@ -32,7 +34,8 @@ function Homepage(param) {
     localStorage.setItem('miniumumTransactionValue', miniumumTransactionValue);
     localStorage.setItem('minimumEqualTransactions', minimumEqualTransactions);
     localStorage.setItem('minimumValueEqualTransactions', minimumValueEqualTransactions);
-  }, [totalTransactions, miniumumTransactionValue, minimumEqualTransactions, minimumValueEqualTransactions]);
+    localStorage.setItem('totalMinimumTransactions', totalMinimumTransactions)
+  }, [totalTransactions, miniumumTransactionValue, minimumEqualTransactions, minimumValueEqualTransactions, totalMinimumTransactions]);
 
   useEffect(() => {
     localStorage.setItem("latestSearches", JSON.stringify(latestSearch));
@@ -128,7 +131,7 @@ function Homepage(param) {
                 <div id="settings-main-content">
                   <div>
                     <h3>Total amount of transactions to fetch</h3>
-                    <input type="search" id="test" value={totalTransactions} placeholder="Ex. 1000" onChange={(e) => setTotalTransactions(e.target.value)} />
+                    <input type="search" id="test" value={totalTransactions} placeholder="Max. 1000" onChange={(e) => setTotalTransactions(e.target.value)} />
                   </div>
                   <div>
                     <h3>Minimum value of each fetched transaktion</h3>
@@ -141,6 +144,10 @@ function Homepage(param) {
                   <div>
                     <h3>Minimum value of each equal transaction out</h3>
                     <input type="search" value={minimumValueEqualTransactions} placeholder="Ex. 1" onChange={(e) => setMinimumValueEqualTransactions(e.target.value)} />
+                  </div>
+                  <div>
+                    <h3>Total transaction for each receiving wallet</h3>
+                    <input type="search" value={totalMinimumTransactions} placeholder="Ex. 50" onChange={(e) => setTotalMinimumTransactions(e.target.value)} />
                   </div>
                 </div>
               </div>
