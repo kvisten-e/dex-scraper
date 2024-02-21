@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoSettingsSharp } from "react-icons/io5";
+import { csvParse } from 'd3-dsv';
+
 
 function Homepage(param) {
   const [address, setAddress] = useState("");
@@ -17,6 +19,7 @@ function Homepage(param) {
   const [minimumValueEqualTransactions, setMinimumValueEqualTransactions] = useState(() => localStorage.getItem('minimumValueEqualTransactions') || '1');
   const [totalMinimumTransactions, setTotalMinimumTransactions] = useState(() => localStorage.getItem('totalMinimumTransactions') || '1')
   const [settingsParam, setSettingsParam] = useState({});
+  const [csvData, setCsvData] = useState([])
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -57,6 +60,20 @@ function Homepage(param) {
     };
   }, [address])
   
+  useEffect(() => {
+    fetch('./src/assets/dex.csv')
+      .then(response => response.text())
+      .then(csvText => {
+        const parsedData = csvParse(csvText, d => ({
+          dex: d.dex,
+          address: d.address
+        }));
+        setCsvData(parsedData);
+      })
+      .catch(error => console.error('Error reading the CSV file:', error));
+  }, []);
+  
+  console.log("CsvData: ", csvData)
 
   const checkAddress = (valueButton) => {
     const base58Chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
@@ -77,6 +94,17 @@ function Homepage(param) {
       }
     }
     return false
+  }
+
+  const handleSearchName = (search) => {
+    const matchingEntry = csvData.find(entry => entry.address.trim() == search.trim());
+    if (matchingEntry) {
+      console.log("MatchingEntry: ", matchingEntry)
+      return matchingEntry.dex
+    } else {
+      console.log("Not: ", search)
+      return search
+    }
   }
 
   const handleSearch = (valueButton) => {
@@ -165,7 +193,7 @@ function Homepage(param) {
               <ul id="list-latest-search">
                 {latestSearch.map((search, index) => (
                   <p key={index}>
-                    <button onClick={() => { handleSearch(search) }}>{search}</button>
+                    <button onClick={() => { handleSearch(search) }}>{handleSearchName(search)}</button>
                   </p>
                 )).reverse()}
               </ul>
@@ -184,3 +212,5 @@ function checkAddress(wallet) {
 }
 
 export default Homepage;
+
+
