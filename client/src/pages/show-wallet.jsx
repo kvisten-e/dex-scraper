@@ -61,7 +61,16 @@ function ShowWallet() {
   return (
     <>
       <div className="show-wallet-main">
-        {/* Your existing JSX structure */}
+        <div className="show-wallet-header">
+          <div className="show-wallet-address">
+            <h3>Address:</h3>
+            <h3>{address}</h3>
+          </div>
+          <div className="show-wallet-transactions">
+            <h3>Transactions:</h3>
+            <h3>1-{getParams.get("total_tx")}</h3>
+          </div>
+        </div>
         <div className="found-wallets">
           <h3>Antal hittade wallets: {data ? data.length : <Skeleton />}</h3>
           <p>Completed: {JSON.stringify(stepCompletedarr)}</p> {/* Change here to stringify */}

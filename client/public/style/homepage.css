@@ -208,7 +208,6 @@ button:hover {
 
 #settings-body {
   width: 100%;
-  height: 100%;
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -217,7 +216,7 @@ button:hover {
 
 #settings-main {
   width: 600px;
-  height: 500px;
+  height: auto;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -288,7 +287,6 @@ button:hover {
 
   #settings {
     position: absolute;
-    height: 70%;
     width: 80%;
     margin: 0;
     background-color: #131313;

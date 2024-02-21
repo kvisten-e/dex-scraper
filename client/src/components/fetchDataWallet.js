@@ -46,6 +46,9 @@ async function main(wallet, params, { signal }) {
         console.log("ConfirmedTransactionList: ", confirmedTransactions)
 
         for (let obj of confirmedTransactions) {
+          if (signal.aborted) {
+            return 
+          }
           const checkForTransactions = await findTransactionsFromWallet(obj.wallet, params[2].min_eq_tx, params[3].min_eq_value_tx, params[4].total_min_tx)
           const wallets = checkForTransactions.map(transaction => transaction.wallets);
           console.log(obj.wallet, " = ", wallets)
@@ -144,7 +147,7 @@ async function main(wallet, params, { signal }) {
         });
 
         let filteredAmountToWallets = Object.keys(amountToWallets).reduce((acc, amount) => {
-          if (amountToWallets[amount].length >= 3) {
+          if (amountToWallets[amount].length >= Number(min_eq_tx)) {
             acc[amount] = amountToWallets[amount];
           }
           return acc;
@@ -154,12 +157,17 @@ async function main(wallet, params, { signal }) {
           wallets
         }));
         console.log("FindTransactionsFromWallet: ", findTransactionsFromWallet)
-        return findTransactionsFromWallet
+        const allEqual = arr => arr.every(val => val === arr[0]);
+
+        const filterOutAllEqualWallets = findTransactionsFromWallet.filter(obj => !allEqual(obj.wallets))
+        return filterOutAllEqualWallets
       }
     } catch (error) {
       console.log(error)
     }
   }
+
+  
 
 
 
