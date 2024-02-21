@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { main, stepCompleted } from '../components/fetchDataWallet.js';
 import PresentData from '../components/presentData.jsx';
 import Skeleton from 'react-loading-skeleton';
@@ -9,38 +9,54 @@ function ShowWallet() {
   const getParams = new URLSearchParams(document.location.search);
   const [data, setDataChain] = useState(null);
   const [stepCompletedarr, setStepCompletedarr] = useState([]);
-  const [loading, setLoading] = useState(true); // Track loading state
+  const [loading, setLoading] = useState(true); 
+  const isMountedRef = useRef(false);
 
   useEffect(() => {
-    async function loadData() {
-      setLoading(true); // Begin loading
-      try {
-        const paramsData = [
-          { "total_tx": getParams.get("total_tx") },
-          { "min_tx_value": getParams.get("min_tx_value") },
-          { "min_eq_tx": getParams.get("min_eq_tx") },
-          { "min_eq_value_tx": getParams.get("min_eq_value_tx") },
-          { "total_min_tx": getParams.get("total_min_tx") },
-        ];
+    const controller = new AbortController();
+    const signal = controller.signal;
 
-        const dataChain = await main(address, paramsData);
-        setDataChain(typeof dataChain !== 'undefined' ? dataChain : []);
+    const paramsData = [
+      { "total_tx": getParams.get("total_tx") },
+      { "min_tx_value": getParams.get("min_tx_value") },
+      { "min_eq_tx": getParams.get("min_eq_tx") },
+      { "min_eq_value_tx": getParams.get("min_eq_value_tx") },
+      { "total_min_tx": getParams.get("total_min_tx") },
+    ];
+
+    const loadData = async () => {
+      if (!isMountedRef.current) {
+        // If it's the first render, don't fetch data
+        isMountedRef.current = true; // Mark as mounted for subsequent renders
+        return;
+      }      
+      setLoading(true); 
+      try {
+        console.log("Start data fetch")
+        const dataChain = await main(address, paramsData, { signal });
+        console.log("Datachain: ", dataChain)
+        if (typeof dataChain !== 'undefined') {
+          console.log("Ändrar 'loading' till false")
+          setDataChain(dataChain)
+          setLoading(false);
+        } else {
+          setDataChain([])  
+        }
+
       } catch (error) {
         console.error("Failed to fetch data", error);
         setDataChain([]);
-      } finally {
-        setLoading(false); // End loading
       }
     }
-
+    console.log("Loading: ", loading)
     loadData();
+
+    return () => {
+      console.log("Avbruten")
+      controller.abort();
+    };
   }, [address]);
 
-  useEffect(() => {
-    // This will not automatically update when stepCompleted changes outside of this component
-    setStepCompletedarr(stepCompleted);
-    console.log()
-  }); // Consider adding dependencies that trigger this effect
 
   return (
     <>
@@ -51,7 +67,7 @@ function ShowWallet() {
           <p>Completed: {JSON.stringify(stepCompletedarr)}</p> {/* Change here to stringify */}
         </div>
         <div className="data-skeleton-loader">
-          {loading ? <Skeleton count={5} /> : data && data.length > 0 ? <PresentData dataString={data} /> : <p>No Transactions found</p>}
+          {loading ? <Skeleton variant="rectangular" width={210} height={118} /> : data && data.length > 0 ? <PresentData dataString={data} /> : <p>No Transactions found</p>}
         </div>
       </div>
     </>
