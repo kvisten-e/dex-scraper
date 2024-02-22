@@ -65,7 +65,7 @@ export default function PresentResult() {
                   completed: index === 0 ? 100 : step.completed
                 })));
 
-                const confirmedTransactions = await checkSolAmountTransaction(wallet, listTransactions, Number(params[1].min_tx_value))
+                const confirmedTransactions = await checkSolAmountTransaction(wallet, listTransactions, Number(params[1].min_tx_value), Number(params[2].max_tx_value))
                 console.log("ConfirmedTransactionList: ", confirmedTransactions)
 
                 let count = 1;
@@ -82,7 +82,7 @@ export default function PresentResult() {
                 
                   count += 1
 
-                  const checkForTransactions = await findTransactionsFromWallet(obj.wallet, params[2].min_eq_tx, params[3].min_eq_value_tx, params[4].total_min_tx)
+                  const checkForTransactions = await findTransactionsFromWallet(obj.wallet, params[3].min_eq_tx, params[4].min_eq_value_tx, params[5].total_min_tx)
                   const wallets = checkForTransactions.map(transaction => transaction.wallets);
 
                   if (wallets.length > 0 && wallets.length === new Set(wallets).size) {
@@ -94,10 +94,9 @@ export default function PresentResult() {
               console.error('Error fetching signatures:', error);
             }
             return data
-
           }
 
-          async function checkSolAmountTransaction(wallet, list, amount) {
+          async function checkSolAmountTransaction(wallet, list, min_amount, max_amount) {
             let confirmedTransactionList = []
             try {
               let count = 0
@@ -120,7 +119,7 @@ export default function PresentResult() {
                     if (instruction.programId.toBase58() === SystemProgram.programId.toBase58() && instruction.parsed.info.source == wallet) {
                       if (instruction.parsed && instruction.parsed.type === 'transfer') {
                         const transferAmount = instruction.parsed.info.lamports / LAMPORTS_PER_SOL;
-                        if (transferAmount >= amount) {
+                        if (max_amount >= transferAmount >= min_amount) {
                           confirmedTransactionList.push({ "wallet": instruction.parsed.info.destination, "amount": transferAmount })
                         }
 
@@ -151,7 +150,6 @@ export default function PresentResult() {
                     transactions = []
                     return transactions
                   }
-                  await delay(10);
                   const transactionDetails = await rotateRPC().getParsedTransaction(signature, { commitment: 'confirmed', maxSupportedTransactionVersion: 0 },);
                   if (transactionDetails) {
                     for (const instruction of transactionDetails.transaction.message.instructions) {

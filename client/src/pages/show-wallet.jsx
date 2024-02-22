@@ -24,6 +24,7 @@ function ShowWallet() {
     const paramsData = [
       { "total_tx": getParams.get("total_tx") },
       { "min_tx_value": getParams.get("min_tx_value") },
+      { "max_tx_value": getParams.get("max_tx_value") },
       { "min_eq_tx": getParams.get("min_eq_tx") },
       { "min_eq_value_tx": getParams.get("min_eq_value_tx") },
       { "total_min_tx": getParams.get("total_min_tx") },

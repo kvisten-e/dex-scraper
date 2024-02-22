@@ -16,6 +16,7 @@ function Homepage(param) {
 
   const [totalTransactions, setTotalTransactions] = useState(() => localStorage.getItem('totalTransactions') || '500');
   const [miniumumTransactionValue, setMinumumTransactionValue] = useState(() => localStorage.getItem('miniumumTransactionValue') || '3');
+  const [maximumTransactionValue, setMaximumTransactionValue] = useState(() => localStorage.getItem('maximumTransactionValue') || '20');
   const [minimumEqualTransactions, setMinimumEqualTransactions] = useState(() => localStorage.getItem('minimumEqualTransactions') || '3');
   const [minimumValueEqualTransactions, setMinimumValueEqualTransactions] = useState(() => localStorage.getItem('minimumValueEqualTransactions') || '0.4');
   const [totalMinimumTransactions, setTotalMinimumTransactions] = useState(() => localStorage.getItem('totalMinimumTransactions') || '25')
@@ -27,6 +28,7 @@ function Homepage(param) {
     const newSettingsParam = {
       total_tx: totalTransactions,
       min_tx_value: miniumumTransactionValue,
+      max_tx_value: maximumTransactionValue,
       min_eq_tx: minimumEqualTransactions,
       min_eq_value_tx: minimumValueEqualTransactions,
       total_min_tx: totalMinimumTransactions
@@ -36,10 +38,11 @@ function Homepage(param) {
 
     localStorage.setItem('totalTransactions', totalTransactions);
     localStorage.setItem('miniumumTransactionValue', miniumumTransactionValue);
+    localStorage.setItem('maximumTransactionValue', maximumTransactionValue);
     localStorage.setItem('minimumEqualTransactions', minimumEqualTransactions);
     localStorage.setItem('minimumValueEqualTransactions', minimumValueEqualTransactions);
     localStorage.setItem('totalMinimumTransactions', totalMinimumTransactions)
-  }, [totalTransactions, miniumumTransactionValue, minimumEqualTransactions, minimumValueEqualTransactions, totalMinimumTransactions]);
+  }, [totalTransactions, miniumumTransactionValue, maximumTransactionValue, minimumEqualTransactions, minimumValueEqualTransactions, totalMinimumTransactions]);
 
   useEffect(() => {
     localStorage.setItem("latestSearches", JSON.stringify(latestSearch));
@@ -158,8 +161,11 @@ function Homepage(param) {
                     <input type="search" id="test" value={totalTransactions} placeholder="Max. 1000" onChange={(e) => setTotalTransactions(e.target.value)} />
                   </div>
                   <div>
-                    <h3>Minimum value of each fetched transaktion</h3>
-                    <input type="search" value={miniumumTransactionValue} placeholder="Ex. 10" onChange={(e) => setMinumumTransactionValue(e.target.value)} />
+                    <h3>Value of each fetched transaktion</h3>
+                    <div>
+                      <input type="search" value={miniumumTransactionValue} placeholder="Ex. 3" onChange={(e) => setMinumumTransactionValue(e.target.value)} />
+                      <input type="search" value={maximumTransactionValue} placeholder="Ex. 20" onChange={(e) => setMaximumTransactionValue(e.target.value)} />
+                    </div>
                   </div>
                   <div>
                     <h3>Amount of equal sent transaction from each found wallets</h3>
