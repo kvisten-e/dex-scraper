@@ -218,17 +218,17 @@ export default function PresentResult() {
     fetchData()
   }, [signal])
 
-
+    
   return <>
       <div className="found-transactions">
         {loading ? <p></p> : data && data.length > 0 ?
           data.map((obj, index) => <section>
-            <h4>{index + 1}. {obj.wallet} received: &nbsp;{obj.amount} sol</h4>
+            <h4><a href={"https://solscan.io/account/" + obj.wallet + "#solTransfers"} target="_blank"> {index + 1}. {obj.wallet} received: {obj.amount} sol</a></h4>
             <ul>
               {obj.walletSentOut.map(foundWallets => <div>
                 <p>{obj.wallet.substring(0, 4)} sent out {foundWallets.amount} to: </p>
                 <ul>
-                  {foundWallets.wallets.map(eachWallet => <li>{eachWallet}</li>)}
+                  {foundWallets.wallets.map(eachWallet => <li><a href={"https://solscan.io/account/"+eachWallet+"#solTransfers"} target="_blank">{eachWallet}</a></li>)}
                 </ul>
               </div>)}
             </ul>

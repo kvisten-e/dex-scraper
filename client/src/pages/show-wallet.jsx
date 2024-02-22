@@ -14,7 +14,7 @@ function ShowWallet() {
   const { wallet, setWallet } = useContext(GlobalContext)
   const { params, setParams } = useContext(GlobalContext)
   const { signal, setSignal } = useContext(GlobalContext)
-  const {stepStatus} = useContext(GlobalContext)
+  const [ status, setStatus] = useState("")
 
   useEffect(() => {
     const controller = new AbortController();
@@ -45,7 +45,10 @@ function ShowWallet() {
     };
   }, []);
 
-
+  useEffect(() => {
+    const allCompleted = process.every(obj => obj.completed === 100);
+    setStatus(allCompleted ? "Completed" : "Ongoing");
+  }, [process]); 
   return (
     <>
       <div className="show-wallet-main">
@@ -59,7 +62,13 @@ function ShowWallet() {
             <h3>1-{getParams.get("total_tx")}</h3>
           </div>
           <div className="show-process">
-            <h3>Progress:</h3>
+            <div className='status-text'>
+              <h3>Progress: </h3>
+              {status === 'Completed' ?
+                <h3 style={{ color: 'rgba(14, 248, 41, 0.87)' }}>{status}</h3> :
+                <h3 style={{ color: 'rgba(255, 255, 255, 0.87)' }}>{status}</h3>
+              }
+            </div>
             <div className='show-process-bars'>
               {process.map((key, index) => (
                 <div key={index} className='key'>
