@@ -73,6 +73,7 @@ export default function PresentResult() {
                   if (signal.aborted) {
                     return
                   }
+                  console.log("confirmedTransactions length: ", confirmedTransactions.length)
                   let statusCompleted = (count / confirmedTransactions.length) * 100
                   setProcess(prevProcess => prevProcess.map((step, index) => ({
                     ...step,
@@ -106,7 +107,7 @@ export default function PresentResult() {
                   return confirmedTransactionList
                 }
                 await delay(10);
-
+                count++
                 setProcess(prevProcess => prevProcess.map((step, index) => ({
                   ...step,
                   completed: index === 1 ? (count / list.length) * 100 : step.completed
