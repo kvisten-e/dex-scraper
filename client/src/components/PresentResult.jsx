@@ -73,8 +73,6 @@ export default function PresentResult() {
                   if (signal.aborted) {
                     return
                   }
-                  console.log("confirmedTransactions length: ", confirmedTransactions.length)
-                  console.log(obj.wallet, " : ", count)
                   let statusCompleted = (count / confirmedTransactions.length) * 100
                   setProcess(prevProcess => prevProcess.map((step, index) => ({
                     ...step,
@@ -85,7 +83,6 @@ export default function PresentResult() {
 
                   const checkForTransactions = await findTransactionsFromWallet(obj.wallet, params[2].min_eq_tx, params[3].min_eq_value_tx, params[4].total_min_tx)
                   const wallets = checkForTransactions.map(transaction => transaction.wallets);
-                  console.log(obj.wallet, " = ", wallets)
 
                   if (wallets.length > 0 && wallets.length === new Set(wallets).size) {
                     data.push({ "wallet": obj.wallet, "amount": obj.amount, "walletSentOut": checkForTransactions })
@@ -95,7 +92,6 @@ export default function PresentResult() {
             } catch (error) {
               console.error('Error fetching signatures:', error);
             }
-            console.log("Data: ", data)
             return data
 
           }
@@ -110,7 +106,6 @@ export default function PresentResult() {
                   return confirmedTransactionList
                 }
                 await delay(10);
-                console.log("CheckSolAmountTransaction: ", count++)
 
                 setProcess(prevProcess => prevProcess.map((step, index) => ({
                   ...step,
@@ -125,7 +120,6 @@ export default function PresentResult() {
                       if (instruction.parsed && instruction.parsed.type === 'transfer') {
                         const transferAmount = instruction.parsed.info.lamports / LAMPORTS_PER_SOL;
                         if (transferAmount >= amount) {
-                          //console.log(`Found SOL transfer: ${transferAmount} SOL - Destination: ${instruction.parsed.info.destination}`);
                           confirmedTransactionList.push({ "wallet": instruction.parsed.info.destination, "amount": transferAmount })
                         }
 
@@ -204,17 +198,14 @@ export default function PresentResult() {
         }
 
         const result = await main()
-        console.log("Result: ", result)
-        console.log("startFetch", startFetch)
+
         if (startFetch) {
-          console.log("Ändrar 'loading' till false")
           const sortedDataByPrice = result.sort((p1, p2) => (p1.amount < p2.amount) ? 1 : (p1.amount > p2.amount) ? -1 : 0)
           setData(sortedDataByPrice)
           setLoading(false)
         }
     }
     setStartFetch(true)     
-    console.log("Loading", loading)
     fetchData()
   }, [signal])
 

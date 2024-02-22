@@ -8,16 +8,17 @@ function Homepage(param) {
   const [address, setAddress] = useState("");
   const [latestSearch, setLatestSearch] = useState(() => {
     const savedSearches = localStorage.getItem("latestSearches");
+    console.log(savedSearches)
     return savedSearches ? JSON.parse(savedSearches) : [];
   });
   const [settings, setSettings] = useState(false)
   const [hereId, setHereId] = useState('input-wallet')
 
-  const [totalTransactions, setTotalTransactions] = useState(() => localStorage.getItem('totalTransactions') || '1000');
-  const [miniumumTransactionValue, setMinumumTransactionValue] = useState(() => localStorage.getItem('miniumumTransactionValue') || '10');
+  const [totalTransactions, setTotalTransactions] = useState(() => localStorage.getItem('totalTransactions') || '500');
+  const [miniumumTransactionValue, setMinumumTransactionValue] = useState(() => localStorage.getItem('miniumumTransactionValue') || '3');
   const [minimumEqualTransactions, setMinimumEqualTransactions] = useState(() => localStorage.getItem('minimumEqualTransactions') || '3');
-  const [minimumValueEqualTransactions, setMinimumValueEqualTransactions] = useState(() => localStorage.getItem('minimumValueEqualTransactions') || '1');
-  const [totalMinimumTransactions, setTotalMinimumTransactions] = useState(() => localStorage.getItem('totalMinimumTransactions') || '1')
+  const [minimumValueEqualTransactions, setMinimumValueEqualTransactions] = useState(() => localStorage.getItem('minimumValueEqualTransactions') || '0.4');
+  const [totalMinimumTransactions, setTotalMinimumTransactions] = useState(() => localStorage.getItem('totalMinimumTransactions') || '25')
   const [settingsParam, setSettingsParam] = useState({});
   const [csvData, setCsvData] = useState([])
   const navigate = useNavigate();
@@ -114,16 +115,18 @@ function Homepage(param) {
     const params = new URLSearchParams(settingsParam);
 
     if (valueButton == null) {
-      setLatestSearch(prevSearches => {
-        let updatedSearches = [...prevSearches, address];
+      if (!latestSearch.includes(address)) {
+        setLatestSearch(prevSearches => {
+          let updatedSearches = [...prevSearches, address];
 
-        if (updatedSearches.length > 5) {
-          updatedSearches = updatedSearches.slice(-5);
-        }
+          if (updatedSearches.length > 5) {
+            updatedSearches = updatedSearches.slice(-5);
+          }
 
-        localStorage.setItem("latestSearches", JSON.stringify(updatedSearches));
-        return updatedSearches;
-      });
+          localStorage.setItem("latestSearches", JSON.stringify(updatedSearches));
+          return updatedSearches;
+        });        
+      }
 
       setAddress('');
 
