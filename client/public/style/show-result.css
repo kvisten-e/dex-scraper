@@ -6,8 +6,8 @@
   align-items: center;
   flex-direction: column;
   .show-wallet-header{
+    color: rgba(255, 255, 255, 0.87);
     width: 100%;
-    height: 300px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -43,8 +43,32 @@
     .show-wallet-transactions>* {
       margin: 0px 20px 20px 30px
     }
+    .show-process{
+      border-top: 1px solid white;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      .show-process-bars{
+        width: 70vw;
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        .key{
+          width: 100%;
+          display: flex;
+          align-items: center;
+          flex-direction: column;
+        }
+      }
+      .progress{
+        width: 100%;
+        height: 20px;
+      }
+    }
   }
   .data-skeleton-loader{
+    color: rgba(255, 255, 255, 0.87);
     width: 90vw;
     height: 90vh;
     overflow-y: scroll;

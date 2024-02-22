@@ -12,7 +12,8 @@ export default function PresentResult() {
   const { wallet } = useContext(GlobalContext)
   const { params, setParams } = useContext(GlobalContext)
   const { signal } = useContext(GlobalContext)
-  const {setStepStatus} = useContext(GlobalContext)
+  const { setStepStatus } = useContext(GlobalContext)
+  const [loading, setLoading] = useState(true); 
 
 
   useEffect(() => {
@@ -61,10 +62,21 @@ export default function PresentResult() {
               const confirmedTransactions = await checkSolAmountTransaction(wallet, listTransactions, Number(params[1].min_tx_value))
               console.log("ConfirmedTransactionList: ", confirmedTransactions)
 
+              let count = 1;
               for (let obj of confirmedTransactions) {
                 if (signal.aborted) {
                   return
                 }
+                console.log("confirmedTransactions length: ", confirmedTransactions.length)
+                console.log(obj.wallet, " : ", count)
+                let statusCompleted = (count / confirmedTransactions.length) * 100
+                setProcess(prevProcess => prevProcess.map((step, index) => ({
+                  ...step,
+                  completed: index === 2 ? statusCompleted : step.completed
+                })));  
+                
+                count += 1
+
                 const checkForTransactions = await findTransactionsFromWallet(obj.wallet, params[2].min_eq_tx, params[3].min_eq_value_tx, params[4].total_min_tx)
                 const wallets = checkForTransactions.map(transaction => transaction.wallets);
                 console.log(obj.wallet, " = ", wallets)
@@ -73,7 +85,6 @@ export default function PresentResult() {
                   data.push({ "wallet": obj.wallet, "amount": obj.amount, "walletSentOut": checkForTransactions })
                 }
               }
-            } else {
             }
           } catch (error) {
             console.error('Error fetching signatures:', error);
@@ -97,7 +108,7 @@ export default function PresentResult() {
 
               setProcess(prevProcess => prevProcess.map((step, index) => ({
                 ...step,
-                completed: index === 1 ? round((count / list.length)*100) : step.completed
+                completed: index === 1 ? (count / list.length)*100 : step.completed
               })));
 
               const transactionDetails = await rotateRPC().getParsedTransaction(signature, { commitment: 'confirmed', maxSupportedTransactionVersion: 0 });
@@ -133,7 +144,6 @@ export default function PresentResult() {
                 return signature.signature
               })
               let transactions = []
-              let count = 0
               for (let signature of listTransactions) {
 
                 if (signal.aborted) {
@@ -141,7 +151,6 @@ export default function PresentResult() {
                   return transactions
                 }
                 await delay(10);
-                console.log("FindTransactionsFromWallet: ", count++)
                 const transactionDetails = await rotateRPC().getParsedTransaction(signature, { commitment: 'confirmed', maxSupportedTransactionVersion: 0 },);
                 if (transactionDetails) {
                   for (const instruction of transactionDetails.transaction.message.instructions) {

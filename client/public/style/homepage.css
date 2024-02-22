@@ -14,6 +14,7 @@
 }
 
 #root {
+  background-color: #242424;
   width: 100vw;
   height: 100vh;
   margin: 0;
@@ -110,6 +111,7 @@ button:hover {
 }
 
 #search-func {
+  color: rgba(255, 255, 255, 0.87);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -127,6 +129,7 @@ button:hover {
   align-items: center;
   margin-bottom: 20px;
   flex-direction: column;
+  color: rgba(255, 255, 255, 0.87);
 }
 
 #area-latest-search>h3 {
@@ -207,11 +210,13 @@ button:hover {
 }
 
 #settings-body {
+
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: flex-start;
   margin-top: 40px;
+  color: rgba(255, 255, 255, 0.87);
 }
 
 #settings-main {
@@ -292,6 +297,7 @@ button:hover {
     background-color: #131313;
     border-radius: 10px;
     z-index: 1;
+    height: 70%;
   }
 
 }

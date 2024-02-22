@@ -2,6 +2,9 @@ import { useParams } from 'react-router-dom';
 import { useEffect, useState, useRef, useContext } from 'react';
 import { GlobalContext } from '../components/GlobalContext.jsx';
 import PresentResult from '../components/PresentResult.jsx';
+import ProgressBar from 'react-bootstrap/ProgressBar';
+
+
 
 
 function ShowWallet() {
@@ -42,7 +45,6 @@ function ShowWallet() {
     };
   }, []);
 
-console.log("Process: ", process)
 
   return (
     <>
@@ -58,11 +60,15 @@ console.log("Process: ", process)
           </div>
           <div className="show-process">
             <h3>Process:</h3>
-            {process.map((key, index) => (
-              <div key={index}>
-                <p>{key.step}: {key.completed}</p>
-              </div>
-            ))}
+            <div className='show-process-bars'>
+              {process.map((key, index) => (
+                <div key={index} className='key'>
+                  <p>{key.step}</p>
+                  <ProgressBar animated now={key.completed} max={100} variant='success' />
+                </div>
+              ))}
+            </div>
+
           </div>          
         </div>
         <div className="found-wallets">
