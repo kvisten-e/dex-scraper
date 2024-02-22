@@ -30,9 +30,9 @@ function ShowWallet() {
     ];
 
     setProcess([
-      { step: "Get transactions", completed: 0 },
-      { step: "Find all spl-transfer of SOL", completed: 0 },
-      { step: "Find wallets that have distributed sol ", completed: 0 }
+      { step: "1. Get transactions", completed: 0 },
+      { step: "2. Find all spl-transfer of SOL", completed: 0 },
+      { step: "3. Get wallets that have distributed SOL ", completed: 0 }
     ])
 
     setParams(paramsData)
@@ -59,7 +59,7 @@ function ShowWallet() {
             <h3>1-{getParams.get("total_tx")}</h3>
           </div>
           <div className="show-process">
-            <h3>Process:</h3>
+            <h3>Progress:</h3>
             <div className='show-process-bars'>
               {process.map((key, index) => (
                 <div key={index} className='key'>
