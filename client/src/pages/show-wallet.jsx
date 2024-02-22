@@ -1,20 +1,22 @@
 import { useParams } from 'react-router-dom';
-import { useEffect, useState, useRef } from 'react';
-import { main, stepCompleted } from '../components/fetchDataWallet.js';
-import PresentData from '../components/presentData.jsx';
-import Skeleton from 'react-loading-skeleton';
+import { useEffect, useState, useRef, useContext } from 'react';
+import { GlobalContext } from '../components/GlobalContext.jsx';
+import PresentResult from '../components/PresentResult.jsx';
+
 
 function ShowWallet() {
   const { address } = useParams();
   const getParams = new URLSearchParams(document.location.search);
-  const [data, setDataChain] = useState(null);
-  const [stepCompletedarr, setStepCompletedarr] = useState([]);
-  const [loading, setLoading] = useState(true); 
-  const isMountedRef = useRef(false);
+  const { process, setProcess } = useContext(GlobalContext)
+  const { wallet, setWallet } = useContext(GlobalContext)
+  const { params, setParams } = useContext(GlobalContext)
+  const { signal, setSignal } = useContext(GlobalContext)
+  const {stepStatus} = useContext(GlobalContext)
 
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
+    setSignal(signal)
 
     const paramsData = [
       { "total_tx": getParams.get("total_tx") },
@@ -24,39 +26,23 @@ function ShowWallet() {
       { "total_min_tx": getParams.get("total_min_tx") },
     ];
 
-    const loadData = async () => {
-      if (!isMountedRef.current) {
-        // If it's the first render, don't fetch data
-        isMountedRef.current = true; // Mark as mounted for subsequent renders
-        return;
-      }      
-      setLoading(true); 
-      try {
-        console.log("Start data fetch")
-        const dataChain = await main(address, paramsData, { signal });
-        console.log("Datachain: ", dataChain)
-        if (typeof dataChain !== 'undefined') {
-          console.log("Ändrar 'loading' till false")
-          setDataChain(dataChain)
-          setLoading(false);
-        } else {
-          setDataChain([])  
-        }
+    setProcess([
+      { step: "Get transactions", completed: 0 },
+      { step: "Find all spl-transfer of SOL", completed: 0 },
+      { step: "Find wallets that have distributed sol ", completed: 0 }
+    ])
 
-      } catch (error) {
-        console.error("Failed to fetch data", error);
-        setDataChain([]);
-      }
-    }
-    console.log("Loading: ", loading)
-    loadData();
+    setParams(paramsData)
+    setWallet(address)
+
 
     return () => {
       console.log("Avbruten")
       controller.abort();
     };
-  }, [address]);
+  }, []);
 
+console.log("Process: ", process)
 
   return (
     <>
@@ -64,19 +50,26 @@ function ShowWallet() {
         <div className="show-wallet-header">
           <div className="show-wallet-address">
             <h3>Address:</h3>
-            <h3>{address}</h3>
+            <h3>{wallet}</h3>
           </div>
           <div className="show-wallet-transactions">
             <h3>Transactions:</h3>
             <h3>1-{getParams.get("total_tx")}</h3>
           </div>
+          <div className="show-process">
+            <h3>Process:</h3>
+            {process.map((key, index) => (
+              <div key={index}>
+                <p>{key.step}: {key.completed}</p>
+              </div>
+            ))}
+          </div>          
         </div>
         <div className="found-wallets">
-          <h3>Antal hittade wallets: {data ? data.length : <Skeleton />}</h3>
-          <p>Completed: {JSON.stringify(stepCompletedarr)}</p> {/* Change here to stringify */}
+          <h3>Antal hittade wallets: </h3>
         </div>
         <div className="data-skeleton-loader">
-          {loading ? <Skeleton variant="rectangular" width={210} height={118} /> : data && data.length > 0 ? <PresentData dataString={data} /> : <p>No Transactions found</p>}
+          {<PresentResult />}
         </div>
       </div>
     </>

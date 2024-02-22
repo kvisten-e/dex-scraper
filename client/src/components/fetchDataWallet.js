@@ -1,7 +1,8 @@
 import * as web3 from '@solana/web3.js';
 import { SystemProgram, SystemInstruction, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { GlobalContext } from '../components/GlobalContext.jsx';
+import { useContext, useEffect } from 'react';
 
-let stepCompleted = []
 
 function createRPCRotator() {
   const RPCs = [
@@ -16,15 +17,9 @@ function createRPCRotator() {
 
 const rotateRPC = createRPCRotator();
 
-async function main(wallet, params, { signal }) {
-  const quicknode = "https://nameless-misty-dinghy.solana-mainnet.quiknode.pro/90d509b42b4d4c41ee745f1d1aba3ae791c81729/"
-  const pikaRPC = "https://beta-va2.pikanode.io/"
-  const newRPC = "https://mainnet.helius-rpc.com/?api-key=3676f470-afe6-4e70-8966-3d096f4053ba"
-  const rpcUrl = 'https://rpc.hellomoon.io/';
-  const mainnetrpc = "web3.clusterApiUrl('mainnet-beta')"
-  //const connection = new web3.Connection(newRPC, 'confirmed');
-  const jsonString = await fetchMainWalletTransactions()
+async function main(wallet, params, {signal}) {
 
+  const jsonString = await fetchMainWalletTransactions()
 
   function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -35,14 +30,12 @@ async function main(wallet, params, { signal }) {
     try {
       const signatures = await rotateRPC().getSignaturesForAddress(getPublickey(wallet), { limit: Number(params[0].total_tx), commitment: "finalized" });
       if (signatures.length > 0) {
-        stepCompleted.push({ step1: true })
         const listTransactions = signatures.map(signature => {
           return signature.signature
         })
         console.log("List transactions: ", listTransactions)
 
         const confirmedTransactions = await checkSolAmountTransaction(wallet, listTransactions, Number(params[1].min_tx_value))
-        stepCompleted.push({ step2: true })
         console.log("ConfirmedTransactionList: ", confirmedTransactions)
 
         for (let obj of confirmedTransactions) {
@@ -57,9 +50,7 @@ async function main(wallet, params, { signal }) {
             data.push({ "wallet": obj.wallet, "amount": obj.amount, "walletSentOut": checkForTransactions })
           }
         }
-        stepCompleted.push({ step3: true })
       } else {
-        stepCompleted.push({ error: false })
       }
     } catch (error) {
       console.error('Error fetching signatures:', error);
@@ -166,13 +157,10 @@ async function main(wallet, params, { signal }) {
       console.log(error)
     }
   }
-
-  
-
-
-
   return jsonString
 }
+
+main()
 
 
 
@@ -181,12 +169,5 @@ function getPublickey(wallet) {
   return publicKeyGet
 }
 
-export { main, stepCompleted }
+export { main }
 
-/* main("5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9", [
-  { total_tx: "1000" },
-  { min_tx_value: "2" },
-  { min_eq_tx: "2" },
-  { min_eq_value_tx: "0.01" },
-  { total_min_tx: "40"}
-]) */

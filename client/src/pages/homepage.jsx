@@ -46,10 +46,8 @@ function Homepage(param) {
 
   useEffect(() => {
     const keyEnter = event => {
-      console.log('User pressed: ', event.key);
       if (event.key === 'Enter') {
         event.preventDefault();
-        console.log("trigged")
         handleSearch()
       }
     }
@@ -73,7 +71,6 @@ function Homepage(param) {
       .catch(error => console.error('Error reading the CSV file:', error));
   }, []);
   
-  console.log("CsvData: ", csvData)
 
   const checkAddress = (valueButton) => {
     const base58Chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
@@ -99,19 +96,15 @@ function Homepage(param) {
   const handleSearchName = (search) => {
     const matchingEntry = csvData.find(entry => entry.address.trim() == search.trim());
     if (matchingEntry) {
-      console.log("MatchingEntry: ", matchingEntry)
       return matchingEntry.dex
     } else {
-      console.log("Not: ", search)
       return search
     }
   }
 
   const handleSearch = (valueButton) => {
     const walletToCheck = valueButton || address
-    console.log(walletToCheck)
     if (!walletToCheck || checkAddress(valueButton)) {
-      console.log("inne")
       setHereId('input-wallet-wrong');
       setTimeout(() => {
         setHereId('input-wallet');
