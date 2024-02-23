@@ -1,0 +1,10 @@
+
+#save-wallet-page{
+  background-color: rgb(104, 104, 104);
+  width: 100%;
+  height: 700px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+}

@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoSettingsSharp } from "react-icons/io5";
 import { csvParse } from 'd3-dsv';
+import { SavedContext } from "../components/SavedWalletContext.jsx";
+import Badge from 'react-bootstrap/Badge';
 
 
 function Homepage(param) {
+  const { savedWallets, defaultWallets } = useContext(SavedContext)
   const [address, setAddress] = useState("");
   const [latestSearch, setLatestSearch] = useState(() => {
     const savedSearches = localStorage.getItem("latestSearches");
-    console.log(savedSearches)
     return savedSearches ? JSON.parse(savedSearches) : [];
   });
   const [settings, setSettings] = useState(false)
@@ -75,6 +77,9 @@ function Homepage(param) {
       .catch(error => console.error('Error reading the CSV file:', error));
   }, []);
   
+  const customBadge = {
+    backgroundColor: "#646cff",
+  }
 
   const checkAddress = (valueButton) => {
     const base58Chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
@@ -107,6 +112,7 @@ function Homepage(param) {
   }
 
   const handleSearch = (valueButton) => {
+    console.log("Value: ", valueButton)
     const walletToCheck = valueButton || address
     if (!walletToCheck || checkAddress(valueButton)) {
       setHereId('input-wallet-wrong');
@@ -188,7 +194,10 @@ function Homepage(param) {
             <input type="search" value={address} id={hereId} placeholder="Enter A Solana address" onChange={(e) => setAddress(e.target.value)} />
             <button id="button-search" onClick={() => { handleSearch() }}>Scrape wallet</button>
           </div>
-
+          <div id="saved-wallets-homepage"> 
+            {defaultWallets.map(obj => <Badge bg="secondary" onClick={() => { handleSearch(obj.address.trim()) }}>{obj.name}</Badge>)}
+            {savedWallets.map(obj => <Badge bg="" style={customBadge} onClick={() => { handleSearch(obj.address.trim()) }}>{obj.name}</Badge>)}
+          </div>
           <div id="area-latest-search">
             <h3>Latest search</h3>
             <div id="latest-search">

@@ -70,21 +70,8 @@ h1 {
   line-height: 1.1;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
 
-button:hover {
-  background-color: #646cff;
-}
+
 
 
 #main-page {
@@ -119,6 +106,9 @@ button:hover {
   gap: 20px;
   width: 100%;
   height: 40%;
+  input{
+    background-color: rgb(41, 41, 41);
+  }
 }
 
 #area-latest-search {
@@ -149,6 +139,20 @@ button:hover {
 #list-latest-search {
   width: 100%;
   padding: 0;
+  button{
+    border-radius: 8px;
+    border: 1px solid transparent;
+    padding: 0.6em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    background-color: #1a1a1a;
+    cursor: pointer;
+    transition: border-color 0.25s;
+  }
+  button:hover {
+    background-color: #646cff;
+  }
 }
 
 #list-latest-search>p {
@@ -207,6 +211,15 @@ button:hover {
   height: 40px;
   width: 80%;
   border-color: #646cff;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color:#646cff;
+  cursor: pointer;
+  transition: border-color 0.25s;
 }
 
 #settings-body {
@@ -310,7 +323,22 @@ button:hover {
 
 
 
+  #saved-wallets-homepage {
+    width: 80%;
+    margin-top: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 10px;
 
+    span:hover {
+      cursor: pointer;
+    }
+
+    span {
+      flex-basis: 5.5rem;
+    }
+  }
 
 
 
