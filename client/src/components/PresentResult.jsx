@@ -102,6 +102,7 @@ export default function PresentResult() {
               let count = 0
               for (let signature of list) {
                 if (signal.aborted) {
+                  console.log("Avbryter")
                   confirmedTransactionList = []
                   return confirmedTransactionList
                 }
@@ -115,14 +116,12 @@ export default function PresentResult() {
                 const transactionDetails = await rotateRPC().getParsedTransaction(signature, { commitment: 'confirmed', maxSupportedTransactionVersion: 0 });
                 if (transactionDetails) {
                   for (const instruction of transactionDetails.transaction.message.instructions) {
-
                     if (instruction.programId.toBase58() === SystemProgram.programId.toBase58() && instruction.parsed.info.source == wallet) {
                       if (instruction.parsed && instruction.parsed.type === 'transfer') {
                         const transferAmount = instruction.parsed.info.lamports / LAMPORTS_PER_SOL;
-                        if (max_amount >= transferAmount >= min_amount) {
+                      if (transferAmount >= min_amount && transferAmount <= max_amount ) {
                           confirmedTransactionList.push({ "wallet": instruction.parsed.info.destination, "amount": transferAmount })
                         }
-
                       }
                     }
 
