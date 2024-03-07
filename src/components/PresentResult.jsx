@@ -29,8 +29,7 @@ export default function PresentResult() {
 
           function createRPCRotator() {
             const RPCs = [
-              "https://mainnet.helius-rpc.com/?api-key=3676f470-afe6-4e70-8966-3d096f4053ba",
-              "https://mainnet.helius-rpc.com/?api-key=ab19f7c7-c836-4bbc-ae73-74ea4eb2c9f8"
+              import.meta.env.VITE_RPC_1, import.meta.env.VITE_RPC_2
             ];
             return function () {
               RPCs.push(RPCs.shift())
