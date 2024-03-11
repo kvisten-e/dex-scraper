@@ -29,7 +29,7 @@ export default function PresentResult() {
 
           function createRPCRotator() {
             const RPCs = [
-              import.meta.env.VITE_RPC_1, import.meta.env.VITE_RPC_2
+              import.meta.env.VITE_RPC_3
             ];
             return function () {
               RPCs.push(RPCs.shift())
@@ -50,49 +50,64 @@ export default function PresentResult() {
           }
 
           async function fetchMainWalletTransactions() {
-            let data = []
+            let filteredResults = [];
             try {
               const signatures = await rotateRPC().getSignaturesForAddress(getPublickey(wallet), { limit: Number(params[0].total_tx), commitment: "finalized" });
               if (signatures.length > 0) {
-                const listTransactions = signatures.map(signature => {
-                  return signature.signature
-                })
-                console.log("List transactions: ", listTransactions)
+                const listTransactions = signatures.map(signature => signature.signature);
+                console.log("List transactions: ", listTransactions);
 
                 setProcess(prevProcess => prevProcess.map((step, index) => ({
                   ...step,
                   completed: index === 0 ? 100 : step.completed
                 })));
 
-                const confirmedTransactions = await checkSolAmountTransaction(wallet, listTransactions, Number(params[1].min_tx_value), Number(params[2].max_tx_value))
-                console.log("ConfirmedTransactionList: ", confirmedTransactions)
+                const confirmedTransactions = await checkSolAmountTransaction(wallet, listTransactions, Number(params[1].min_tx_value), Number(params[2].max_tx_value));
+                console.log("ConfirmedTransactionList: ", confirmedTransactions);
+                let count = 1
+                const transactionPromises = confirmedTransactions.map((obj, index) => 
+                  delay(index * 200).then(async () => {
 
-                let count = 1;
-                for (let obj of confirmedTransactions) {
-                  if (signal.aborted) {
-                    return
-                  }
-                  console.log("confirmedTransactions length: ", confirmedTransactions.length)
-                  let statusCompleted = (count / confirmedTransactions.length) * 100
-                  setProcess(prevProcess => prevProcess.map((step, index) => ({
-                    ...step,
-                    completed: index === 2 ? statusCompleted : step.completed
-                  })));
-                
-                  count += 1
+                    const checkForTransactions = await findTransactionsFromWallet(obj.wallet, params[3].min_eq_tx, params[4].min_eq_value_tx, params[5].total_min_tx)
 
-                  const checkForTransactions = await findTransactionsFromWallet(obj.wallet, params[3].min_eq_tx, params[4].min_eq_value_tx, params[5].total_min_tx)
-                  const wallets = checkForTransactions.map(transaction => transaction.wallets);
+                    console.log("Count: ", count)
+                    console.log("Length: ", confirmedTransactions.length)
 
-                  if (wallets.length > 0 && wallets.length === new Set(wallets).size) {
-                    data.push({ "wallet": obj.wallet, "amount": obj.amount, "walletSentOut": checkForTransactions })
-                  }
-                }
+                    let statusCompleted = (count++ / confirmedTransactions.length) * 100;
+                    setProcess(prevProcess => prevProcess.map((step, idx) => ({
+                      ...step,
+                      completed: idx === 2 ? statusCompleted : step.completed
+                    }))); 
+                    
+                    const wallets = checkForTransactions.map(transaction => transaction.wallets);
+                    if (wallets.length > 0 && wallets.length === new Set(wallets).size) {
+                      return { "wallet": obj.wallet, "amount": obj.amount, "walletSentOut": checkForTransactions };
+                    }
+                    return null;
+
+
+                  })
+                );
+
+                const allTransactionsResults = await Promise.all(transactionPromises);
+                filteredResults = allTransactionsResults.filter(result => result !== null);
               }
             } catch (error) {
               console.error('Error fetching signatures:', error);
             }
-            return data
+            return filteredResults;
+          }
+
+
+          function countDown(index, length) {
+            console.log("Count: ", index)
+            console.log("Length: ", length)
+
+            let statusCompleted = (index / length) * 100;
+            setProcess(prevProcess => prevProcess.map((step, idx) => ({
+              ...step,
+              completed: idx === 2 ? statusCompleted : step.completed
+            })));
           }
 
           async function checkSolAmountTransaction(wallet, list, min_amount, max_amount) {
@@ -101,7 +116,6 @@ export default function PresentResult() {
               let count = 0
               for (let signature of list) {
                 if (signal.aborted) {
-                  console.log("Avbryter")
                   confirmedTransactionList = []
                   return confirmedTransactionList
                 }
@@ -134,6 +148,7 @@ export default function PresentResult() {
           }
 
           async function findTransactionsFromWallet(wallet, min_eq_tx, min_eq_value_tx, total_min_tx) {
+
             const publicKeySearch = getPublickey(wallet)
             try {
               const signatures = await rotateRPC().getSignaturesForAddress(publicKeySearch, { limit: Number(total_min_tx) });
@@ -182,6 +197,7 @@ export default function PresentResult() {
                   wallets
                 }));
                 console.log("FindTransactionsFromWallet: ", findTransactionsFromWallet)
+
                 const allEqual = arr => arr.every(val => val === arr[0]);
 
                 const filterOutAllEqualWallets = findTransactionsFromWallet.filter(obj => !allEqual(obj.wallets))
@@ -191,6 +207,7 @@ export default function PresentResult() {
               console.log(error)
             }
           }
+
           return jsonString
         }
 
@@ -205,7 +222,6 @@ export default function PresentResult() {
     setStartFetch(true)     
     fetchData()
   }, [signal])
-
     
   return <>
       <div className="found-transactions">
