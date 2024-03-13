@@ -16,6 +16,7 @@ export default function PresentResult() {
   const isMountedRef = useRef(false);
   const [startFetch, setStartFetch] = useState(false)
 
+  console.log("RPC: ", import.meta.env.VITE_RPC_3)
 
   useEffect(() => {
 
@@ -52,6 +53,7 @@ export default function PresentResult() {
           async function fetchMainWalletTransactions() {
             let filteredResults = [];
             try {
+              console.log("hej")
               const signatures = await rotateRPC().getSignaturesForAddress(getPublickey(wallet), { limit: Number(params[0].total_tx), commitment: "finalized" });
               if (signatures.length > 0) {
                 const listTransactions = signatures.map(signature => signature.signature);
