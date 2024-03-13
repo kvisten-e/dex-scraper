@@ -16,7 +16,6 @@ export default function PresentResult() {
   const isMountedRef = useRef(false);
   const [startFetch, setStartFetch] = useState(false)
 
-  console.log("RPC: ", import.meta.env.VITE_RPC_3)
 
   useEffect(() => {
 
@@ -53,7 +52,6 @@ export default function PresentResult() {
           async function fetchMainWalletTransactions() {
             let filteredResults = [];
             try {
-              console.log("hej")
               const signatures = await rotateRPC().getSignaturesForAddress(getPublickey(wallet), { limit: Number(params[0].total_tx), commitment: "finalized" });
               if (signatures.length > 0) {
                 const listTransactions = signatures.map(signature => signature.signature);
@@ -71,9 +69,6 @@ export default function PresentResult() {
                   delay(index * 200).then(async () => {
 
                     const checkForTransactions = await findTransactionsFromWallet(obj.wallet, params[3].min_eq_tx, params[4].min_eq_value_tx, params[5].total_min_tx)
-
-                    console.log("Count: ", count)
-                    console.log("Length: ", confirmedTransactions.length)
 
                     let statusCompleted = (count++ / confirmedTransactions.length) * 100;
                     setProcess(prevProcess => prevProcess.map((step, idx) => ({
@@ -101,53 +96,58 @@ export default function PresentResult() {
           }
 
 
-          function countDown(index, length) {
-            console.log("Count: ", index)
-            console.log("Length: ", length)
-
-            let statusCompleted = (index / length) * 100;
-            setProcess(prevProcess => prevProcess.map((step, idx) => ({
-              ...step,
-              completed: idx === 2 ? statusCompleted : step.completed
-            })));
-          }
-
           async function checkSolAmountTransaction(wallet, list, min_amount, max_amount) {
-            let confirmedTransactionList = []
+            let confirmedTransactionList = [];
             try {
-              let count = 0
-              for (let signature of list) {
+              const BATCH_SIZE = 10;
+              for (let i = 0; i < list.length; i += BATCH_SIZE) {
                 if (signal.aborted) {
-                  confirmedTransactionList = []
-                  return confirmedTransactionList
+                  confirmedTransactionList = [];
+                  return confirmedTransactionList;
                 }
-                await delay(10);
-                count++
-                setProcess(prevProcess => prevProcess.map((step, index) => ({
+                
+                let statusCompleted = ((i + 10) / list.length) * 100;
+                setProcess(prevProcess => prevProcess.map((step, idx) => ({
                   ...step,
-                  completed: index === 1 ? (count / list.length) * 100 : step.completed
+                  completed: idx === 1 ? statusCompleted : step.completed
                 })));
 
-                const transactionDetails = await rotateRPC().getParsedTransaction(signature, { commitment: 'confirmed', maxSupportedTransactionVersion: 0 });
-                if (transactionDetails) {
-                  for (const instruction of transactionDetails.transaction.message.instructions) {
-                    if (instruction.programId.toBase58() === SystemProgram.programId.toBase58() && instruction.parsed.info.source == wallet) {
-                      if (instruction.parsed && instruction.parsed.type === 'transfer') {
-                        const transferAmount = instruction.parsed.info.lamports / LAMPORTS_PER_SOL;
-                      if (transferAmount >= min_amount && transferAmount <= max_amount ) {
-                          confirmedTransactionList.push({ "wallet": instruction.parsed.info.destination, "amount": transferAmount })
+                const batch = list.slice(i, i + BATCH_SIZE);
+                
+                const batchPromises = batch.map(signature =>
+                  delay(10).then(async () =>    
+                    rotateRPC().getParsedTransaction(signature, { commitment: 'confirmed', maxSupportedTransactionVersion: 0 })
+                      .catch(error => {
+                        console.log(error);
+                        return null;
+                      })  
+                  )
+                );
+
+                const results = await Promise.all(batchPromises);
+
+                for (const transactionDetails of results) {
+
+                  if (transactionDetails) {
+                    for (const instruction of transactionDetails.transaction.message.instructions) {
+                      if (instruction.programId.toBase58() === SystemProgram.programId.toBase58() && instruction.parsed.info.source == wallet) {
+                        if (instruction.parsed && instruction.parsed.type === 'transfer') {
+                          const transferAmount = instruction.parsed.info.lamports / LAMPORTS_PER_SOL;
+                          if (transferAmount >= min_amount && transferAmount <= max_amount) {
+                            confirmedTransactionList.push({ "wallet": instruction.parsed.info.destination, "amount": transferAmount });
+                          }
                         }
                       }
                     }
-
                   }
                 }
               }
             } catch (error) {
-              console.log(error)
+              console.log(error);
             }
-            return confirmedTransactionList
+            return confirmedTransactionList;
           }
+
 
           async function findTransactionsFromWallet(wallet, min_eq_tx, min_eq_value_tx, total_min_tx) {
 
@@ -198,7 +198,6 @@ export default function PresentResult() {
                   amount: Number(amount),
                   wallets
                 }));
-                console.log("FindTransactionsFromWallet: ", findTransactionsFromWallet)
 
                 const allEqual = arr => arr.every(val => val === arr[0]);
 
