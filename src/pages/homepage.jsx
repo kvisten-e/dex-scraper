@@ -35,8 +35,8 @@ function Homepage(param) {
       min_eq_value_tx: minimumValueEqualTransactions,
       total_min_tx: totalMinimumTransactions
     };
-
     setSettingsParam(newSettingsParam);
+
 
     localStorage.setItem('totalTransactions', totalTransactions);
     localStorage.setItem('miniumumTransactionValue', miniumumTransactionValue);
@@ -112,7 +112,6 @@ function Homepage(param) {
   }
 
   const handleSearch = (valueButton) => {
-    console.log("Value: ", valueButton)
     const walletToCheck = valueButton || address
     if (!walletToCheck || checkAddress(valueButton)) {
       setHereId('input-wallet-wrong');
@@ -147,6 +146,16 @@ function Homepage(param) {
         navigate(`/address/${valueButton}?${params.toString()}`);
       }, 10)
     }
+  }
+
+  const handleSearchAll = () => {
+
+    const params = new URLSearchParams(settingsParam);
+
+    setTimeout(() => {
+      navigate(`/all-dexes?${params.toString()}`);
+    }, 10);
+
   }
 
 
@@ -193,6 +202,7 @@ function Homepage(param) {
             <h2>Enter dex wallet</h2>
             <input type="search" value={address} id={hereId} placeholder="Enter A Solana address" onChange={(e) => setAddress(e.target.value)} />
             <button id="button-search" onClick={() => { handleSearch() }}>Scrape wallet</button>
+            <button id="button-search-all" onClick={() => { handleSearchAll() }}>Scrape ALL wallets</button>
           </div>
           <div id="saved-wallets-homepage"> 
             {defaultWallets.map(obj => <Badge bg="secondary" onClick={() => { handleSearch(obj.address.trim()) }}>{obj.name}</Badge>)}
@@ -216,11 +226,6 @@ function Homepage(param) {
   );
 }
 
-
-function checkAddress(wallet) {
-  
-  return false
-}
 
 export default Homepage;
 

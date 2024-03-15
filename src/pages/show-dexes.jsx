@@ -3,18 +3,19 @@ import { useEffect, useState, useRef, useContext } from 'react';
 import { GlobalContext } from '../components/GlobalContext.jsx';
 import PresentResult from '../components/PresentResult.jsx';
 import ProgressBar from 'react-bootstrap/ProgressBar';
+import { SavedContext } from '../components/SavedWalletContext.jsx';
 
 
 
 
-function ShowWallet() {
-  const { address } = useParams();
+export default function ShowDexes() {
   const getParams = new URLSearchParams(document.location.search);
   const { process, setProcess } = useContext(GlobalContext)
-  const { wallet, setWallet } = useContext(GlobalContext)
-  const { params, setParams } = useContext(GlobalContext)
-  const { signal, setSignal } = useContext(GlobalContext)
-  const [ status, setStatus] = useState("")
+  const { defaultWallets } = useContext(SavedContext)
+  const { setParams } = useContext(GlobalContext)
+  const { setSignal } = useContext(GlobalContext)
+  const [status, setStatus] = useState("")
+  const [wallets, setWallets] = useState([])
 
   useEffect(() => {
     const controller = new AbortController();
@@ -36,15 +37,19 @@ function ShowWallet() {
       { step: "3. Get wallets that have distributed SOL ", completed: 0 }
     ])
 
-    setParams(paramsData)
-    setWallet(address)
 
+    let arrayWallets = defaultWallets.map(obj => {
+      return obj.address.trim()
+    })
+
+    setParams(paramsData)
+    setWallets(arrayWallets)
 
     return () => {
       console.log("Avbruten")
       controller.abort();
     };
-  }, []);
+  }, [defaultWallets]);
 
   useEffect(() => {
     const allCompleted = process.every(obj => obj.completed === 100);
@@ -58,7 +63,9 @@ function ShowWallet() {
         <div className="show-wallet-header">
           <div className="show-wallet-address">
             <h3>Address:</h3>
-            <h3>{wallet}</h3>
+            <div className='d-flex gap-2 align-items-end justify-content-center flex-wrap' style={{height: "100%", fontSize:"140%", fontWeight: "bold"}} >
+              {defaultWallets.map(obj => <p>{obj.name}, </p>)}
+            </div>
           </div>
           <div className="show-wallet-transactions">
             <h3>Transactions:</h3>
@@ -87,11 +94,10 @@ function ShowWallet() {
           <h3>Antal hittade wallets: </h3>
         </div>
         <div className="data-skeleton-loader">
-          {<PresentResult wallet={wallet} />}
+          {<PresentResult wallet={wallets}/>}
         </div>
       </div>
     </>
   );
 }
 
-export default ShowWallet;

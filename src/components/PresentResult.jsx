@@ -4,17 +4,26 @@ import { SystemProgram, SystemInstruction, LAMPORTS_PER_SOL } from '@solana/web3
 import { GlobalContext } from './GlobalContext.jsx';
 
 
-export default function PresentResult() {
+export default function PresentResult(props) {
 
 
   const [sortedData, setSortedData] = useState([])
   const { process, setProcess } = useContext(GlobalContext)
-  const { wallet } = useContext(GlobalContext)
+  const [wallet, setWallet] = useState([])
   const { params, setParams } = useContext(GlobalContext)
   const { signal } = useContext(GlobalContext)
   const [loading, setLoading] = useState(true);
   const isMountedRef = useRef(false);
   const [finishedResult, setfinishedResult] = useState([])
+
+
+  useEffect(() => {
+    if (typeof props.wallet === 'string') {
+      setWallet([props.wallet])
+    } else if (typeof props.wallet === 'object') {
+      setWallet(props.wallet)
+    }
+  },[signal])
 
   useEffect(() => {
 
@@ -56,17 +65,34 @@ export default function PresentResult() {
               async function fetchMainWalletTransactions() {
                 let filteredResults = [];
                 try {
-                  const signatures = await rotateRPC().getSignaturesForAddress(getPublickey(wallet), { limit: Number(params[0].total_tx), commitment: "finalized" });
-                  if (signatures.length > 0) {
-                    const listTransactions = signatures.map(signature => signature.signature);
-                    console.log("List transactions: ", listTransactions);
-
+                  let signatures = []
+                  if (wallet.length === 1) {
+                    signatures = await rotateRPC().getSignaturesForAddress(getPublickey(wallet[0]), { limit: Number(params[0].total_tx), commitment: "finalized" });
+                   
                     setProcess(prevProcess => prevProcess.map((step, index) => ({
                       ...step,
                       completed: index === 0 ? 100 : step.completed
                     })));
 
-                    const confirmedTransactions = await checkSolAmountTransaction(wallet, listTransactions, Number(params[1].min_tx_value), Number(params[2].max_tx_value));
+                  } else {
+                    let count = 1
+                    for (let eachWallet of wallet) {
+                      let signatureFetch = await rotateRPC().getSignaturesForAddress(getPublickey(eachWallet), { limit: Number(params[0].total_tx), commitment: "finalized" });
+                      signatures = signatures.concat(signatureFetch)
+                      
+                      let statusCompleted = (count++ / wallet.length) * 100;
+                      setProcess(prevProcess => prevProcess.map((step, index) => ({
+                        ...step,
+                        completed: index === 0 ? statusCompleted : step.completed
+                      })));                      
+                    }
+                  }
+
+                  if (signatures.length > 0) {
+                    const listTransactions = signatures.map(signature => signature.signature);
+                    console.log("List transactions: ", listTransactions);
+
+                    const confirmedTransactions = await checkSolAmountTransaction(wallet[0], listTransactions, Number(params[1].min_tx_value), Number(params[2].max_tx_value));
                     console.log("ConfirmedTransactionList: ", confirmedTransactions);
                     let count = 1
                     const transactionPromises = confirmedTransactions.map((obj, index) =>
@@ -92,7 +118,8 @@ export default function PresentResult() {
 
                     const allTransactionsResults = await Promise.all(transactionPromises);
                     filteredResults = allTransactionsResults.filter(result => result !== null);
-                  }
+                  }  
+                  
                 } catch (error) {
                   console.error('Error fetching signatures:', error);
                 }
@@ -226,13 +253,13 @@ export default function PresentResult() {
         } catch {
           setProcess([])
           console.log("Failed to fetch, starting again...")
-        }        
+        }
       }
 
     }
     load()
 
-  }, [signal])
+  }, [wallet])
 
   useEffect(() => {
     let ready = process.filter(step => step.completed === 100)
@@ -247,20 +274,20 @@ export default function PresentResult() {
   })
 
   return <>
-      <div className="found-transactions">
-        {loading ? <p></p> : sortedData && sortedData.length > 0 ?
-          sortedData.map((obj, index) => <section>
-            <h4><a href={"https://solscan.io/account/" + obj.wallet + "#solTransfers"} target="_blank"> {index + 1}. {obj.wallet} received: {obj.amount} sol</a></h4>
-            <ul>
-              {obj.walletSentOut.map(foundWallets => <div>
-                <p>{obj.wallet.substring(0, 4)} sent out {foundWallets.amount} to: </p>
-                <ul>
-                  {foundWallets.wallets.map(eachWallet => <li><a href={"https://solscan.io/account/"+eachWallet+"#solTransfers"} target="_blank">{eachWallet}</a></li>)}
-                </ul>
-              </div>)}
-            </ul>
-          </section>)
-          : <p>No Transactions found</p>}
-      </div>
+    <div className="found-transactions">
+      {loading ? <p></p> : sortedData && sortedData.length > 0 ?
+        sortedData.map((obj, index) => <section>
+          <h4><a href={"https://solscan.io/account/" + obj.wallet + "#solTransfers"} target="_blank"> {index + 1}. {obj.wallet} received: {obj.amount} sol</a></h4>
+          <ul>
+            {obj.walletSentOut.map(foundWallets => <div>
+              <p>{obj.wallet.substring(0, 4)} sent out {foundWallets.amount} to: </p>
+              <ul>
+                {foundWallets.wallets.map(eachWallet => <li><a href={"https://solscan.io/account/" + eachWallet + "#solTransfers"} target="_blank">{eachWallet}</a></li>)}
+              </ul>
+            </div>)}
+          </ul>
+        </section>)
+        : <p>No Transactions found</p>}
+    </div>
   </>
 }

@@ -19,7 +19,7 @@
       width: 100%;
       margin-top: 10px;
       display: flex;
-      align-items: flex-end;
+      align-items: center;
     }
 
     .show-wallet-address>* {
@@ -30,9 +30,6 @@
       font-size: 150%;
     }
 
-    .show-wallet-address>*:last-child {
-      font-size: 200%;
-    }
 
     .show-wallet-address>h3:last-child:hover {
       color: white;
