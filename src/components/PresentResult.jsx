@@ -130,14 +130,14 @@ export default function PresentResult(props) {
               async function checkSolAmountTransaction(wallet, list, min_amount, max_amount) {
                 let confirmedTransactionList = [];
                 try {
-                  const BATCH_SIZE = 10;
+                  const BATCH_SIZE = 5;
                   for (let i = 0; i < list.length; i += BATCH_SIZE) {
                     if (signal.aborted) {
                       confirmedTransactionList = [];
                       return confirmedTransactionList;
                     }
 
-                    let statusCompleted = ((i + 10) / list.length) * 100;
+                    let statusCompleted = ((i + BATCH_SIZE) / list.length) * 100;
                     setProcess(prevProcess => prevProcess.map((step, idx) => ({
                       ...step,
                       completed: idx === 1 ? statusCompleted : step.completed
