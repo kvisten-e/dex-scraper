@@ -69,7 +69,7 @@ export default function ShowDexes() {
           </div>
           <div className="show-wallet-transactions">
             <h3>Transactions:</h3>
-            <h3>1-{getParams.get("total_tx")}</h3>
+            <h3>1-{Number(getParams.get("total_tx")) * wallets.length} ({getParams.get("total_tx")} on each dex)</h3>
           </div>
           <div className="show-process">
             <div className='status-text'>
