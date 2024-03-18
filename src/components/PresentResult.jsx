@@ -42,7 +42,7 @@ export default function PresentResult(props) {
 
               function createRPCRotator() {
                 const RPCs = [
-                  import.meta.env.VITE_RPC_3
+                  import.meta.env.VITE_RPC_3, import.meta.env.VITE_RPC_4
                 ];
                 return function () {
                   RPCs.push(RPCs.shift())
@@ -92,7 +92,7 @@ export default function PresentResult(props) {
                     const listTransactions = signatures.map(signature => signature.signature);
                     console.log("List transactions: ", listTransactions);
 
-                    const confirmedTransactions = await checkSolAmountTransaction(wallet[0], listTransactions, Number(params[1].min_tx_value), Number(params[2].max_tx_value));
+                    const confirmedTransactions = await checkSolAmountTransaction(wallet, listTransactions, Number(params[1].min_tx_value), Number(params[2].max_tx_value));
                     console.log("ConfirmedTransactionList: ", confirmedTransactions);
                     let count = 1
                     const transactionPromises = confirmedTransactions.map((obj, index) =>
@@ -130,7 +130,7 @@ export default function PresentResult(props) {
               async function checkSolAmountTransaction(wallet, list, min_amount, max_amount) {
                 let confirmedTransactionList = [];
                 try {
-                  const BATCH_SIZE = 5;
+                  const BATCH_SIZE = 20;
                   for (let i = 0; i < list.length; i += BATCH_SIZE) {
                     if (signal.aborted) {
                       confirmedTransactionList = [];
@@ -144,7 +144,6 @@ export default function PresentResult(props) {
                     })));
 
                     const batch = list.slice(i, i + BATCH_SIZE);
-
                     const batchPromises = batch.map(signature =>
                       delay(10).then(async () =>
                         rotateRPC().getParsedTransaction(signature, { commitment: 'confirmed', maxSupportedTransactionVersion: 0 })
@@ -156,12 +155,10 @@ export default function PresentResult(props) {
                     );
 
                     const results = await Promise.all(batchPromises);
-
                     for (const transactionDetails of results) {
-
                       if (transactionDetails) {
                         for (const instruction of transactionDetails.transaction.message.instructions) {
-                          if (instruction.programId.toBase58() === SystemProgram.programId.toBase58() && instruction.parsed.info.source == wallet) {
+                          if (instruction.programId.toBase58() === SystemProgram.programId.toBase58() && wallet.includes(instruction.parsed.info.source)) {
                             if (instruction.parsed && instruction.parsed.type === 'transfer') {
                               const transferAmount = instruction.parsed.info.lamports / LAMPORTS_PER_SOL;
                               if (transferAmount >= min_amount && transferAmount <= max_amount) {
