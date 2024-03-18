@@ -8,6 +8,7 @@ function GlobalProvider({children}) {
   const [params, setParams] = useState({})
   const [signal, setSignal] = useState({})
   const [stepStatus, setStepStatus] = useState([0, 0, 0])
+  const [switchButton, setSwitchButton] = useState({ checked: false })
 
   return <GlobalContext.Provider
     value={{
@@ -21,6 +22,8 @@ function GlobalProvider({children}) {
       setSignal,
       stepStatus,
       setStepStatus,
+      switchButton,
+      setSwitchButton
     }}>
     {children}
   </GlobalContext.Provider>

@@ -14,6 +14,8 @@ function ShowWallet() {
   const { wallet, setWallet } = useContext(GlobalContext)
   const { params, setParams } = useContext(GlobalContext)
   const { signal, setSignal } = useContext(GlobalContext)
+  const {switchButton, setSwitchButton } = useContext(GlobalContext)
+
   const [ status, setStatus] = useState("")
 
   useEffect(() => {
@@ -21,7 +23,7 @@ function ShowWallet() {
     const signal = controller.signal;
     setSignal(signal)
 
-    const paramsData = [
+    const paramsDataCT = [
       { "total_tx": getParams.get("total_tx") },
       { "min_tx_value": getParams.get("min_tx_value") },
       { "max_tx_value": getParams.get("max_tx_value") },
@@ -30,13 +32,26 @@ function ShowWallet() {
       { "total_min_tx": getParams.get("total_min_tx") },
     ];
 
+    const paramsDataTS = [
+      { "total_tx": getParams.get("total_tx") },
+      { "min_tx_value": getParams.get("min_tx_value") },
+      { "max_tx_value": getParams.get("max_tx_value") },
+      { "max_dec_value": getParams.get("max_dec_value") },
+      { "total_wallet_tx": getParams.get("total_wallet_tx") },
+      { "procent_sent_sol": getParams.get("procent_sent_sol") },
+    ];
+
     setProcess([
       { step: "1. Get transactions", completed: 0 },
       { step: "2. Find all spl-transfer of SOL", completed: 0 },
       { step: "3. Get wallets that have distributed SOL ", completed: 0 }
     ])
 
-    setParams(paramsData)
+    if (!switchButton.checked) {
+      setParams(paramsDataCT)      
+    } else {
+      setParams(paramsDataTS)
+    }
     setWallet(address)
 
 
@@ -82,9 +97,6 @@ function ShowWallet() {
             </div>
 
           </div>          
-        </div>
-        <div className="found-wallets">
-          <h3>Antal hittade wallets: </h3>
         </div>
         <div className="data-skeleton-loader">
           {<PresentResult wallet={wallet} />}

@@ -6,9 +6,9 @@ import { GlobalContext } from './GlobalContext.jsx';
 
 export default function PresentResult(props) {
 
-
   const [sortedData, setSortedData] = useState([])
-  const { process, setProcess } = useContext(GlobalContext)
+  const { process, setProcess, switchButton, setSwitchButton } = useContext(GlobalContext)
+  
   const [wallet, setWallet] = useState([])
   const { params, setParams } = useContext(GlobalContext)
   const { signal } = useContext(GlobalContext)
@@ -27,7 +27,7 @@ export default function PresentResult(props) {
 
   useEffect(() => {
 
-    async function load() {
+    async function loadCT() {
       setLoading(true)
       let success = false
       while (!success) {
@@ -257,7 +257,16 @@ export default function PresentResult(props) {
       }
 
     }
-    load()
+
+    async function loadTS() {
+    }
+
+    if (!switchButton.checked) {
+      console.log("tjo")
+      loadCT()      
+    } else {
+      loadTS()
+    }
 
   }, [wallet])
 
@@ -276,7 +285,7 @@ export default function PresentResult(props) {
   return <>
     <div className="found-transactions">
       {loading ? <p></p> : sortedData && sortedData.length > 0 ?
-        sortedData.map((obj, index) => <section>
+        !switchButton.checked ? sortedData.map((obj, index) => <section>
           <h4><a href={"https://solscan.io/account/" + obj.wallet + "#solTransfers"} target="_blank"> {index + 1}. {obj.wallet} received: {obj.amount} sol</a></h4>
           <ul>
             {obj.walletSentOut.map(foundWallets => <div>
@@ -286,7 +295,7 @@ export default function PresentResult(props) {
               </ul>
             </div>)}
           </ul>
-        </section>)
+        </section>) : <p>Hej</p>
         : <p>No Transactions found</p>}
     </div>
   </>

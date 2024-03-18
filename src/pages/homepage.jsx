@@ -1,13 +1,16 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, Component } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoSettingsSharp } from "react-icons/io5";
 import { csvParse } from 'd3-dsv';
 import { SavedContext } from "../components/SavedWalletContext.jsx";
+import { GlobalContext } from "../components/GlobalContext.jsx";
 import Badge from 'react-bootstrap/Badge';
+import Switch from "react-switch";
 
 
 function Homepage(param) {
   const { savedWallets, defaultWallets } = useContext(SavedContext)
+  const {switchButton, setSwitchButton } = useContext(GlobalContext)
   const [address, setAddress] = useState("");
   const [latestSearch, setLatestSearch] = useState(() => {
     const savedSearches = localStorage.getItem("latestSearches");
@@ -16,35 +19,71 @@ function Homepage(param) {
   const [settings, setSettings] = useState(false)
   const [hereId, setHereId] = useState('input-wallet')
 
-  const [totalTransactions, setTotalTransactions] = useState(() => localStorage.getItem('totalTransactions') || '500');
-  const [miniumumTransactionValue, setMinumumTransactionValue] = useState(() => localStorage.getItem('miniumumTransactionValue') || '3');
-  const [maximumTransactionValue, setMaximumTransactionValue] = useState(() => localStorage.getItem('maximumTransactionValue') || '20');
-  const [minimumEqualTransactions, setMinimumEqualTransactions] = useState(() => localStorage.getItem('minimumEqualTransactions') || '3');
-  const [minimumValueEqualTransactions, setMinimumValueEqualTransactions] = useState(() => localStorage.getItem('minimumValueEqualTransactions') || '0.4');
-  const [totalMinimumTransactions, setTotalMinimumTransactions] = useState(() => localStorage.getItem('totalMinimumTransactions') || '25')
-  const [settingsParam, setSettingsParam] = useState({});
+  const [totalTransactionsCT, setTotalTransactionsCT] = useState(() => localStorage.getItem('totalTransactionsCT') || '500');
+  const [miniumumTransactionValueCT, setMinumumTransactionValueCT] = useState(() => localStorage.getItem('miniumumTransactionValueCT') || '3');
+  const [maximumTransactionValueCT, setMaximumTransactionValueCT] = useState(() => localStorage.getItem('maximumTransactionValueCT') || '20');
+  const [minimumEqualTransactionsCT, setMinimumEqualTransactionsCT] = useState(() => localStorage.getItem('minimumEqualTransactionsCT') || '3');
+  const [minimumValueEqualTransactionsCT, setMinimumValueEqualTransactionsCT] = useState(() => localStorage.getItem('minimumValueEqualTransactionsCT') || '0.4');
+  const [totalMinimumTransactionsCT, setTotalMinimumTransactionsCT] = useState(() => localStorage.getItem('totalMinimumTransactionsCT') || '25')
+  
+  const [totalTransactionsTS, setTotalTransactionsTS] = useState(() => localStorage.getItem('totalTransactionsTS') || '800');
+  const [miniumumTransactionValueTS, setMinumumTransactionValueTS] = useState(() => localStorage.getItem('miniumumTransactionValueTS') || '10');
+  const [maximumTransactionValueTS, setMaximumTransactionValueTS] = useState(() => localStorage.getItem('maximumTransactionValueTS') || '70');
+  const [maximumDecimalsTS, setMaximumDecimalsTS] = useState(() => localStorage.getItem('maximumDecimalsTS') || '2');
+  const [totalWalletTransactionsTS, setTotalWalletTransactionsTS] = useState(() => localStorage.getItem('totalWalletTransactionsTS') || '10');
+  const [procentSentSol, setProcentSentSol] = useState(() => localStorage.getItem('procentSentSol') || '70');
+
+  
+  
+  const [settingsParamCT, setSettingsParamCT] = useState({});
+  const [settingsParamTS, setSettingsParamTS] = useState({});
+
   const [csvData, setCsvData] = useState([])
   const navigate = useNavigate();
 
   useEffect(() => {
-    const newSettingsParam = {
-      total_tx: totalTransactions,
-      min_tx_value: miniumumTransactionValue,
-      max_tx_value: maximumTransactionValue,
-      min_eq_tx: minimumEqualTransactions,
-      min_eq_value_tx: minimumValueEqualTransactions,
-      total_min_tx: totalMinimumTransactions
+    const newSettingsParamCT = {
+      total_tx: totalTransactionsCT,
+      min_tx_value: miniumumTransactionValueCT,
+      max_tx_value: maximumTransactionValueCT,
+      min_eq_tx: minimumEqualTransactionsCT,
+      min_eq_value_tx: minimumValueEqualTransactionsCT,
+      total_min_tx: totalMinimumTransactionsCT
     };
-    setSettingsParam(newSettingsParam);
+    setSettingsParamCT(newSettingsParamCT);
 
 
-    localStorage.setItem('totalTransactions', totalTransactions);
-    localStorage.setItem('miniumumTransactionValue', miniumumTransactionValue);
-    localStorage.setItem('maximumTransactionValue', maximumTransactionValue);
-    localStorage.setItem('minimumEqualTransactions', minimumEqualTransactions);
-    localStorage.setItem('minimumValueEqualTransactions', minimumValueEqualTransactions);
-    localStorage.setItem('totalMinimumTransactions', totalMinimumTransactions)
-  }, [totalTransactions, miniumumTransactionValue, maximumTransactionValue, minimumEqualTransactions, minimumValueEqualTransactions, totalMinimumTransactions]);
+    localStorage.setItem('totalTransactionsCT', totalTransactionsCT);
+    localStorage.setItem('miniumumTransactionValueCT', miniumumTransactionValueCT);
+    localStorage.setItem('maximumTransactionValueCT', maximumTransactionValueCT);
+    localStorage.setItem('minimumEqualTransactionsCT', minimumEqualTransactionsCT);
+    localStorage.setItem('minimumValueEqualTransactionsCT', minimumValueEqualTransactionsCT);
+    localStorage.setItem('totalMinimumTransactionsCT', totalMinimumTransactionsCT)
+  }, [totalTransactionsCT, miniumumTransactionValueCT, maximumTransactionValueCT, minimumEqualTransactionsCT, minimumValueEqualTransactionsCT, totalMinimumTransactionsCT]);
+
+
+  useEffect(() => {
+    const newSettingsParamTS = {
+      total_tx: totalTransactionsTS,
+      min_tx_value: miniumumTransactionValueTS,
+      max_tx_value: maximumTransactionValueTS,
+      max_dec_value: maximumDecimalsTS,
+      total_wallet_tx: totalWalletTransactionsTS,
+      procent_sent_sol: procentSentSol,
+    };
+    setSettingsParamTS(newSettingsParamTS);
+
+
+    localStorage.setItem('totalTransactionsTS', totalTransactionsTS);
+    localStorage.setItem('miniumumTransactionValueTS', miniumumTransactionValueTS);
+    localStorage.setItem('maximumTransactionValueTS', maximumTransactionValueTS);
+    localStorage.setItem('maximumDecimalsTS', maximumDecimalsTS);
+    localStorage.setItem('totalWalletTransactionsTS', totalWalletTransactionsTS);
+    localStorage.setItem('procentSentSol', procentSentSol);
+
+  }, [totalTransactionsTS, miniumumTransactionValueTS, maximumTransactionValueTS, maximumDecimalsTS, totalWalletTransactionsTS, procentSentSol]);
+
+
 
   useEffect(() => {
     localStorage.setItem("latestSearches", JSON.stringify(latestSearch));
@@ -111,6 +150,11 @@ function Homepage(param) {
     }
   }
 
+
+  function handleChange(checked) {
+    setSwitchButton({ checked });
+  }
+
   const handleSearch = (valueButton) => {
     const walletToCheck = valueButton || address
     if (!walletToCheck || checkAddress(valueButton)) {
@@ -120,7 +164,9 @@ function Homepage(param) {
       }, 1000);
       return
     }
-    const params = new URLSearchParams(settingsParam);
+    const paramStr = switchButton.checked ? settingsParamTS : settingsParamCT;
+    const params = new URLSearchParams(paramStr);
+
 
     if (valueButton == null) {
       if (!latestSearch.includes(address)) {
@@ -150,7 +196,8 @@ function Homepage(param) {
 
   const handleSearchAll = () => {
 
-    const params = new URLSearchParams(settingsParam);
+    const paramStr = switchButton.checked ? settingsParamTS : settingsParamCT;
+    const params = new URLSearchParams(paramStr);
 
     setTimeout(() => {
       navigate(`/all-dexes?${params.toString()}`);
@@ -158,53 +205,58 @@ function Homepage(param) {
 
   }
 
-
   return (
     <>
       <div id="main-page">
-        <div id="search-bar">
-          <IoSettingsSharp id="settings-icon" style={settings ? { color: "#646cff" } : { color: "white" }} onClick={()=> setSettings(settings ? false : true)}/>
+        <label className="d-flex justify-content-center gap-3">
+          <p style={{color:"white"}}>Copy trader</p>
+          <Switch onChange={handleChange} checked={switchButton.checked} offColor={"#646cff"} uncheckedIcon={false} checkedIcon={false} />
+          <p style={{ color: "white" }}>Snipe tokens</p>
+        </label>  
+        {!switchButton.checked ? <div id="search-bar" style={{ border: "3px solid #646cff"}}>
+          <IoSettingsSharp id="settings-icon" style={settings ? { color: "#646cff" } : { color: "white" }} onClick={() => setSettings(settings ? false : true)} />
           {settings && <div id="settings">
             <div id="settings-body">
               <div id="settings-main">
-                <div id="settings-main-head">
-                  <h2>Search settings</h2>
+                <div id="settings-main-head" className="mb-3">
+                  <h2>Search settings - Copy Trader</h2>
                 </div>
                 <div id="settings-main-content">
                   <div>
-                    <h3>Total amount of transactions to fetch</h3>
-                    <input type="search" id="test" value={totalTransactions} placeholder="Max. 1000" onChange={(e) => setTotalTransactions(e.target.value)} />
+                    <h4>Total amount of transactions to fetch</h4>
+                    <input type="search" id="test" value={totalTransactionsCT} placeholder="Max. 1000" onChange={(e) => setTotalTransactionsCT(e.target.value)} />
                   </div>
                   <div>
-                    <h3>Value of each fetched transaktion</h3>
+                    <h4>Value of each fetched transaktion</h4>
                     <div>
-                      <input type="search" value={miniumumTransactionValue} placeholder="Ex. 3" onChange={(e) => setMinumumTransactionValue(e.target.value)} />
-                      <input type="search" value={maximumTransactionValue} placeholder="Ex. 20" onChange={(e) => setMaximumTransactionValue(e.target.value)} />
+                      <input type="search" value={miniumumTransactionValueCT} placeholder="Ex. 3" onChange={(e) => setMinumumTransactionValueCT(e.target.value)} />
+                      <input type="search" value={maximumTransactionValueCT} placeholder="Ex. 20" onChange={(e) => setMaximumTransactionValueCT(e.target.value)} />
                     </div>
                   </div>
                   <div>
-                    <h3>Amount of equal sent transaction from each found wallets</h3>
-                    <input type="search" value={minimumEqualTransactions} placeholder="Ex. 3" onChange={(e) => setMinimumEqualTransactions(e.target.value)} />
+                    <h4>Amount of equal sent transaction from each found wallets</h4>
+                    <input type="search" value={minimumEqualTransactionsCT} placeholder="Ex. 3" onChange={(e) => setMinimumEqualTransactionsCT(e.target.value)} />
                   </div>
                   <div>
-                    <h3>Minimum value of each equal transaction out</h3>
-                    <input type="search" value={minimumValueEqualTransactions} placeholder="Ex. 1" onChange={(e) => setMinimumValueEqualTransactions(e.target.value)} />
+                    <h4>Minimum value of each equal transaction out</h4>
+                    <input type="search" value={minimumValueEqualTransactionsCT} placeholder="Ex. 1" onChange={(e) => setMinimumValueEqualTransactionsCT(e.target.value)} />
                   </div>
                   <div>
-                    <h3>Total transaction for each receiving wallet</h3>
-                    <input type="search" value={totalMinimumTransactions} placeholder="Ex. 50" onChange={(e) => setTotalMinimumTransactions(e.target.value)} />
+                    <h4>Total transaction for each receiving wallet</h4>
+                    <input type="search" value={totalMinimumTransactionsCT} placeholder="Ex. 50" onChange={(e) => setTotalMinimumTransactionsCT(e.target.value)} />
                   </div>
                 </div>
               </div>
             </div>
           </div>}
           <div id="search-func">
-            <h2>Enter dex wallet</h2>
-            <input type="search" value={address} id={hereId} placeholder="Enter A Solana address" onChange={(e) => setAddress(e.target.value)} />
+            <h2 className="mt-2">Copy trader</h2>
+            <h3>Enter dex wallet</h3>
+            <input type="search" value={address} id={hereId} placeholder="Enter A Solana address" onChange={(e) => setAddress(e.target.value)}/>
             <button id="button-search" onClick={() => { handleSearch() }}>Scrape wallet</button>
             <button id="button-search-all" onClick={() => { handleSearchAll() }}>Scrape ALL wallets</button>
           </div>
-          <div id="saved-wallets-homepage"> 
+          <div id="saved-wallets-homepage">
             {defaultWallets.map(obj => <Badge bg="secondary" onClick={() => { handleSearch(obj.address.trim()) }}>{obj.name}</Badge>)}
             {savedWallets.map(obj => <Badge bg="" style={customBadge} onClick={() => { handleSearch(obj.address.trim()) }}>{obj.name}</Badge>)}
           </div>
@@ -220,7 +272,70 @@ function Homepage(param) {
               </ul>
             </div>
           </div>
-        </div>
+        </div> 
+          :
+          <div id="search-bar" style={{ border: "3px solid #080" }}>
+            <IoSettingsSharp id="settings-icon" style={settings ? { color: "#646cff" } : { color: "white" }} onClick={() => setSettings(settings ? false : true)} />
+            {settings && <div id="settings">
+              <div id="settings-body">
+                <div id="settings-main">
+                  <div id="settings-main-head" className="mb-3">
+                    <h2>Search settings - Snipe tokens</h2>
+                  </div>
+                  <div id="settings-main-content">
+                    <div>
+                      <h4>Total amount of transactions to fetch</h4>
+                      <input type="search" id="test" value={totalTransactionsTS} placeholder="Max. 1000" onChange={(e) => setTotalTransactionsTS(e.target.value)} />
+                    </div>
+                    <div>
+                      <h4>Value of each fetched transaktion</h4>
+                      <div>
+                        <input type="search" value={miniumumTransactionValueTS} placeholder="Ex. 10" onChange={(e) => setMinumumTransactionValueTS(e.target.value)} />
+                        <input type="search" value={maximumTransactionValueTS} placeholder="Ex. 70" onChange={(e) => setMaximumTransactionValueTS(e.target.value)} />
+                      </div>
+                    </div>
+                    <div>
+                      <h4>Amount of deciamls of SOL sent out</h4>
+                      <input type="search" value={maximumDecimalsTS} placeholder="Ex. 2" onChange={(e) => setMaximumDecimalsTS(e.target.value)} />
+                    </div>                    
+                    <div>
+                      <h4>Total transaction in wallet</h4>
+                      <input type="search" value={minimumEqualTransactionsCT} placeholder="Ex. 10" onChange={(e) => setTotalWalletTransactionsTS(e.target.value)} />
+                    </div>
+                    <div>
+                      <h4>% Procent of sent out SOL</h4>
+                      <input type="search" value={procentSentSol} placeholder="Ex. 70" onChange={(e) => setProcentSentSol(e.target.value)} />
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>}
+            <div id="search-func">
+              <h2 className="mt-2">Token sniper</h2>
+              <h3>Enter dex wallet</h3>
+              <input type="search" value={address} id={hereId} placeholder="Enter A Solana address" onChange={(e) => setAddress(e.target.value)} />
+              <button id="button-search" onClick={() => { handleSearch() }}>Scrape wallet</button>
+              <button id="button-search-all" onClick={() => { handleSearchAll() }}>Scrape ALL wallets</button>
+            </div>
+            <div id="saved-wallets-homepage">
+              {defaultWallets.map(obj => <Badge bg="secondary" onClick={() => { handleSearch(obj.address.trim()) }}>{obj.name}</Badge>)}
+              {savedWallets.map(obj => <Badge bg="" style={customBadge} onClick={() => { handleSearch(obj.address.trim()) }}>{obj.name}</Badge>)}
+            </div>
+            <div id="area-latest-search">
+              <h3>Latest search</h3>
+              <div id="latest-search">
+                <ul id="list-latest-search">
+                  {latestSearch.map((search, index) => (
+                    <p key={index}>
+                      <button onClick={() => { handleSearch(search) }}>{handleSearchName(search)}</button>
+                    </p>
+                  )).reverse()}
+                </ul>
+              </div>
+            </div>
+          </div>}
+
       </div>
     </>
   );

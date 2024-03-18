@@ -92,7 +92,6 @@ h1 {
   height: 80%;
   width: 80%;
   margin: 0;
-  background-color: #00000076;
   border-radius: 10px;
   margin-top: 10px;
 }
@@ -170,7 +169,6 @@ h1 {
 
 #input-wallet {
   margin: 0;
-  height: 40px;
   border-radius: 5px;
   width: 80%;
   padding: 0;
@@ -312,6 +310,10 @@ h1 {
 }
 
 #main-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   #settings-icon {
     color: white;
     font-size: 25px;
@@ -327,9 +329,9 @@ h1 {
 
   #settings {
     position: absolute;
-    width: 80%;
+    width: 75%;
     margin: 0;
-    background-color: #131313;
+    background-color: #242424;
     border-radius: 10px;
     z-index: 1;
     height: 70%;
