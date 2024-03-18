@@ -116,9 +116,7 @@ function Homepage(param) {
       .catch(error => console.error('Error reading the CSV file:', error));
   }, []);
   
-  const customBadge = {
-    backgroundColor: "#646cff",
-  }
+
 
   const checkAddress = (valueButton) => {
     const base58Chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
@@ -253,12 +251,12 @@ function Homepage(param) {
             <h2 className="mt-2">Copy trader</h2>
             <h3>Enter dex wallet</h3>
             <input type="search" value={address} id={hereId} placeholder="Enter A Solana address" onChange={(e) => setAddress(e.target.value)}/>
-            <button id="button-search" onClick={() => { handleSearch() }}>Scrape wallet</button>
+            <button id="button-search" style={{backgroundColor: "#646cff", borderColor: "#646cff"}} onClick={() => { handleSearch() }}>Scrape wallet</button>
             <button id="button-search-all" onClick={() => { handleSearchAll() }}>Scrape ALL wallets</button>
           </div>
           <div id="saved-wallets-homepage">
             {defaultWallets.map(obj => <Badge bg="secondary" onClick={() => { handleSearch(obj.address.trim()) }}>{obj.name}</Badge>)}
-            {savedWallets.map(obj => <Badge bg="" style={customBadge} onClick={() => { handleSearch(obj.address.trim()) }}>{obj.name}</Badge>)}
+            {savedWallets.map(obj => <Badge bg="" style={{ backgroundColor: "#646cff" }} onClick={() => { handleSearch(obj.address.trim()) }}>{obj.name}</Badge>)}
           </div>
           <div id="area-latest-search">
             <h3>Latest search</h3>
@@ -315,12 +313,12 @@ function Homepage(param) {
               <h2 className="mt-2">Token sniper</h2>
               <h3>Enter dex wallet</h3>
               <input type="search" value={address} id={hereId} placeholder="Enter A Solana address" onChange={(e) => setAddress(e.target.value)} />
-              <button id="button-search" onClick={() => { handleSearch() }}>Scrape wallet</button>
+              <button id="button-search" style={{ backgroundColor: "#080", borderColor: "#080" }}  onClick={() => { handleSearch() }}>Scrape wallet</button>
               <button id="button-search-all" onClick={() => { handleSearchAll() }}>Scrape ALL wallets</button>
             </div>
             <div id="saved-wallets-homepage">
               {defaultWallets.map(obj => <Badge bg="secondary" onClick={() => { handleSearch(obj.address.trim()) }}>{obj.name}</Badge>)}
-              {savedWallets.map(obj => <Badge bg="" style={customBadge} onClick={() => { handleSearch(obj.address.trim()) }}>{obj.name}</Badge>)}
+              {savedWallets.map(obj => <Badge bg="" style={{ backgroundColor: "#080" }} onClick={() => { handleSearch(obj.address.trim()) }}>{obj.name}</Badge>)}
             </div>
             <div id="area-latest-search">
               <h3>Latest search</h3>
