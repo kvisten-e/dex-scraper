@@ -184,36 +184,46 @@ export default function PresentResult(props) {
 
 
               async function findTransactionsFromWallet(wallet, min_eq_tx, min_eq_value_tx, total_min_tx) {
-
-                const publicKeySearch = getPublickey(wallet)
+                const publicKeySearch = getPublickey(wallet);
                 try {
                   const signatures = await rotateRPC().getSignaturesForAddress(publicKeySearch, { limit: Number(total_min_tx) });
                   if (signatures.length > 0) {
-                    const listTransactions = signatures.map(signature => {
-                      return signature.signature
-                    })
-                    let transactions = []
+                    const listTransactions = signatures.map(signature => signature.signature);
+                    let transactions = [];
                     for (let signature of listTransactions) {
-
                       if (signal.aborted) {
-                        transactions = []
-                        return transactions
+                        transactions = [];
+                        return transactions;
                       }
-                      const transactionDetails = await rotateRPC().getParsedTransaction(signature, { commitment: 'finalized', maxSupportedTransactionVersion: 0 },);
-                      if (transactionDetails) {
-                        for (const instruction of transactionDetails.transaction.message.instructions) {
 
+                      let retries = 3; // Maximum number of retries
+                      let success = false;
+                      let transactionDetails;
+                      while (!success && retries > 0) {
+                        try {
+                          transactionDetails = await rotateRPC().getParsedTransaction(signature, { commitment: 'finalized', maxSupportedTransactionVersion: 0 });
+                          success = true; // If getParsedTransaction succeeds, set success to true to exit the loop
+                        } catch (error) {
+                          console.log(`Retrying due to error: ${error.message}. Retries left: ${retries - 1}`);
+                          retries--;
+                          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second before retrying
+                        }
+                      }
+
+                      if (success && transactionDetails) {
+                        for (const instruction of transactionDetails.transaction.message.instructions) {
                           if (instruction.programId.toBase58() === SystemProgram.programId.toBase58() && instruction.parsed.info.source == wallet) {
                             if (instruction.parsed && instruction.parsed.type === 'transfer') {
                               const transferAmount = instruction.parsed.info.lamports / LAMPORTS_PER_SOL;
                               if (transferAmount >= min_eq_value_tx) {
-                                transactions.push({ "wallet": instruction.parsed.info.destination, "amount": transferAmount })
+                                transactions.push({ "wallet": instruction.parsed.info.destination, "amount": transferAmount });
                               }
                             }
                           }
                         }
                       }
                     }
+
                     let amountToWallets = {};
                     transactions.forEach(({ wallet, amount }) => {
                       if (!amountToWallets[amount]) {
