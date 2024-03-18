@@ -16,19 +16,30 @@ export default function ShowDexes() {
   const { setSignal } = useContext(GlobalContext)
   const [status, setStatus] = useState("")
   const [wallets, setWallets] = useState([])
+  const { switchButton, setSwitchButton } = useContext(GlobalContext)
+
 
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
     setSignal(signal)
 
-    const paramsData = [
+    const paramsDataCT = [
       { "total_tx": getParams.get("total_tx") },
       { "min_tx_value": getParams.get("min_tx_value") },
       { "max_tx_value": getParams.get("max_tx_value") },
       { "min_eq_tx": getParams.get("min_eq_tx") },
       { "min_eq_value_tx": getParams.get("min_eq_value_tx") },
       { "total_min_tx": getParams.get("total_min_tx") },
+    ];
+
+    const paramsDataTS = [
+      { "total_tx": getParams.get("total_tx") },
+      { "min_tx_value": getParams.get("min_tx_value") },
+      { "max_tx_value": getParams.get("max_tx_value") },
+      { "max_dec_value": getParams.get("max_dec_value") },
+      { "total_wallet_tx": getParams.get("total_wallet_tx") },
+      { "procent_sent_sol": getParams.get("procent_sent_sol") },
     ];
 
     setProcess([
@@ -42,7 +53,11 @@ export default function ShowDexes() {
       return obj.address.trim()
     })
 
-    setParams(paramsData)
+    if (!switchButton.checked) {
+      setParams(paramsDataCT)
+    } else {
+      setParams(paramsDataTS)
+    }
     setWallets(arrayWallets)
 
     return () => {

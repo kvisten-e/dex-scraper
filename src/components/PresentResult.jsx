@@ -2,6 +2,7 @@ import { useState, useEffect, useContext, useRef } from "react"
 import * as web3 from '@solana/web3.js';
 import { SystemProgram, SystemInstruction, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { GlobalContext } from './GlobalContext.jsx';
+import { type } from "os";
 
 
 export default function PresentResult(props) {
@@ -10,7 +11,7 @@ export default function PresentResult(props) {
   const { process, setProcess, switchButton, setSwitchButton } = useContext(GlobalContext)
   
   const [wallet, setWallet] = useState([])
-  const { params, setParams } = useContext(GlobalContext)
+  const { params } = useContext(GlobalContext)
   const { signal } = useContext(GlobalContext)
   const [loading, setLoading] = useState(true);
   const isMountedRef = useRef(false);
@@ -256,10 +257,166 @@ export default function PresentResult(props) {
     }
 
     async function loadTS() {
+      setLoading(true)
+      let success = false
+      while (!success) {
+        try {
+          const fetchData = async () => {
+            if (!isMountedRef.current) {
+              isMountedRef.current = true;
+              return;
+            }
+
+            async function main() {
+
+              function createRPCRotator() {
+                const RPCs = [
+                  import.meta.env.VITE_RPC_3, import.meta.env.VITE_RPC_4
+                ];
+                return function () {
+                  RPCs.push(RPCs.shift())
+                  return new web3.Connection(RPCs[0], 'confirmed');
+                }
+              }
+
+              const rotateRPC = createRPCRotator();
+              const jsonString = await fetchMainWalletTransactions()
+
+              function delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+              }
+
+              function getPublickey(wallet) {
+                const publicKeyGet = new web3.PublicKey(wallet);
+                return publicKeyGet
+              }
+
+              async function fetchMainWalletTransactions() {
+                let filteredResults = [];
+                try {
+                  let signatures = []
+                  if (wallet.length === 1) {
+                    signatures = await rotateRPC().getSignaturesForAddress(getPublickey(wallet[0]), { limit: Number(params[0].total_tx), commitment: "finalized" });
+
+                    setProcess(prevProcess => prevProcess.map((step, index) => ({
+                      ...step,
+                      completed: index === 0 ? 100 : step.completed
+                    })));
+
+                  } else {
+                    let count = 1
+                    for (let eachWallet of wallet) {
+                      let signatureFetch = await rotateRPC().getSignaturesForAddress(getPublickey(eachWallet), { limit: Number(params[0].total_tx), commitment: "finalized" });
+                      signatures = signatures.concat(signatureFetch)
+
+                      let statusCompleted = (count++ / wallet.length) * 100;
+                      setProcess(prevProcess => prevProcess.map((step, index) => ({
+                        ...step,
+                        completed: index === 0 ? statusCompleted : step.completed
+                      })));
+                    }
+                  }
+
+                  if (signatures.length > 0) {
+                    const listTransactions = signatures.map(signature => signature.signature);
+                    console.log("List transactions: ", listTransactions);
+                    const confirmedTransactions = await checkSolAmountTransaction(wallet, listTransactions, Number(params[1].min_tx_value), Number(params[2].max_tx_value), Number(params[3].max_dec_value));
+                    console.log("ConfirmedTransactionList: ", confirmedTransactions);
+                    let count = 1
+                    const transactionPromises = confirmedTransactions.map((obj, index) =>
+                      delay(index * 200).then(async () => {
+
+
+                      })
+                    );
+
+                    const allTransactionsResults = await Promise.all(transactionPromises);
+                    filteredResults = allTransactionsResults.filter(result => result !== null);
+                  }
+
+                } catch (error) {
+                  console.error('Error fetching signatures:', error);
+                }
+                return filteredResults;
+              }
+
+
+              async function checkSolAmountTransaction(wallet, list, min_amount, max_amount, max_dec_value) {
+                let confirmedTransactionList = [];
+                try {
+                  const BATCH_SIZE = 20;
+                  for (let i = 0; i < list.length; i += BATCH_SIZE) {
+                    if (signal.aborted) {
+                      confirmedTransactionList = [];
+                      return confirmedTransactionList;
+                    }
+
+                    let statusCompleted = ((i + BATCH_SIZE) / list.length) * 100;
+                    setProcess(prevProcess => prevProcess.map((step, idx) => ({
+                      ...step,
+                      completed: idx === 1 ? statusCompleted : step.completed
+                    })));
+
+                    const batch = list.slice(i, i + BATCH_SIZE);
+                    const batchPromises = batch.map(signature =>
+                      delay(10).then(async () =>
+                        rotateRPC().getParsedTransaction(signature, { commitment: 'confirmed', maxSupportedTransactionVersion: 0 })
+                          .catch(error => {
+                            console.log(error);
+                            return null;
+                          })
+                      )
+                    );
+
+                    const results = await Promise.all(batchPromises);
+                    for (const transactionDetails of results) {
+                      if (transactionDetails) {
+                        for (const instruction of transactionDetails.transaction.message.instructions) {
+                          if (instruction.programId.toBase58() === SystemProgram.programId.toBase58() && wallet.includes(instruction.parsed.info.source)) {
+                            if (instruction.parsed && instruction.parsed.type === 'transfer') {
+                              const transferAmount = instruction.parsed.info.lamports / LAMPORTS_PER_SOL;
+                              let decimalsTransfer = 0
+                              try {
+                                decimalsTransfer = transferAmount.toString().split(".")[1].length
+                              } catch {
+                              }
+
+                              if (transferAmount >= min_amount && transferAmount <= max_amount && decimalsTransfer <= max_dec_value) {
+                                confirmedTransactionList.push({ "wallet": instruction.parsed.info.destination, "amount": transferAmount });
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                } catch (error) {
+                  console.log(error);
+                }
+                return confirmedTransactionList;
+              }
+
+
+              return jsonString
+            }
+
+            const result = await main()
+
+            return result
+          }
+          const result = await fetchData()
+          setfinishedResult(result)
+          success = true
+        } catch {
+          setProcess([])
+          console.log("Failed to fetch, starting again...")
+        }
+      }
+
+
     }
 
     if (!switchButton.checked) {
-      console.log("tjo")
       loadCT()      
     } else {
       loadTS()
