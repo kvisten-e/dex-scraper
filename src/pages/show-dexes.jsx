@@ -105,9 +105,6 @@ export default function ShowDexes() {
 
           </div>          
         </div>
-        <div className="found-wallets">
-          <h3>Antal hittade wallets: </h3>
-        </div>
         <div className="data-skeleton-loader">
           {<PresentResult wallet={wallets}/>}
         </div>

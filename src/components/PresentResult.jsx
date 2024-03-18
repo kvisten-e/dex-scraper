@@ -322,16 +322,12 @@ export default function PresentResult(props) {
                     console.log("List transactions: ", listTransactions);
                     const confirmedTransactions = await checkSolAmountTransaction(wallet, listTransactions, Number(params[1].min_tx_value), Number(params[2].max_tx_value), Number(params[3].max_dec_value));
                     console.log("ConfirmedTransactionList: ", confirmedTransactions);
-                    let count = 1
-                    const transactionPromises = confirmedTransactions.map((obj, index) =>
-                      delay(index * 200).then(async () => {
 
+                    const transactionsListFilteredLength = await getWalletTotalTransactions(confirmedTransactions, Number(params[4].total_wallet_tx))
+                    console.log("transactionsListFilteredLength: ", transactionsListFilteredLength)
 
-                      })
-                    );
-
-                    const allTransactionsResults = await Promise.all(transactionPromises);
-                    filteredResults = allTransactionsResults.filter(result => result !== null);
+                    
+                    filteredResults = transactionsListFilteredLength.filter(result => result !== null);
                   }
 
                 } catch (error) {
@@ -396,9 +392,22 @@ export default function PresentResult(props) {
                 return confirmedTransactionList;
               }
 
+              async function getWalletTotalTransactions(list, amount) {
+                const transactionsPromises = list.map(async obj => {
+                  const amountTransactions = await rotateRPC().getSignaturesForAddress(getPublickey(obj.wallet), { commitment: "finalized" });
+                  if (amountTransactions.length <= amount) {
+                    return obj;
+                  }
+                });
+
+                const allTransactions = await Promise.all(transactionsPromises);
+                const confirmedTransactionsFiltered = allTransactions.filter(tx => tx !== undefined);
+                return confirmedTransactionsFiltered;
+              }
 
               return jsonString
             }
+            
 
             const result = await main()
 

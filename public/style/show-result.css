@@ -4,6 +4,7 @@
   display: flex;
   align-items: center;
   flex-direction: column;
+  gap: 20px;
 
   .show-wallet-header {
     color: rgba(255, 255, 255, 0.87);
@@ -91,8 +92,7 @@
   .data-skeleton-loader {
     color: rgba(255, 255, 255, 0.87);
     width: 90vw;
-    height: 90vh;
-    overflow-y: scroll;
+    min-height: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -101,6 +101,7 @@
 
     .found-transactions {
       width: 100%;
+      min-height: 400px;
       display: flex;
       flex-direction: column;
       align-items: center;
