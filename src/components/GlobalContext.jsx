@@ -7,7 +7,7 @@ function GlobalProvider({children}) {
   const [wallet, setWallet] = useState([])
   const [params, setParams] = useState({})
   const [signal, setSignal] = useState({})
-  const [stepStatus, setStepStatus] = useState([0, 0, 0])
+  const [stepStatus, setStepStatus] = useState([0, 0, 0, 0])
   const [switchButton, setSwitchButton] = useState({ checked: false })
 
   return <GlobalContext.Provider

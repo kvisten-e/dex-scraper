@@ -110,10 +110,10 @@ export default function PresentResult(props) {
 
                           const checkForTransactions = await findTransactionsFromWallet(obj.wallet, params[3].min_eq_tx, params[5].min_eq_value_tx, params[6].total_min_tx)
 
-                          let statusCompleted = (count++ / confirmedTransactions.length) * 100;
+                          let statusCompleted = (count++ / transactionsListFilteredLength.length) * 100;
                           setProcess(prevProcess => prevProcess.map((step, idx) => ({
                             ...step,
-                            completed: idx === 2 ? statusCompleted : step.completed
+                            completed: idx === 3 ? statusCompleted : step.completed
                           })));
 
                           const wallets = checkForTransactions.map(transaction => transaction.wallets);
@@ -145,6 +145,13 @@ export default function PresentResult(props) {
                       confirmedTransactionList = [];
                       return confirmedTransactionList;
                     }
+
+                    let statusCompleted = ((i + BATCH_SIZE) / list.length) * 100;
+                    setProcess(prevProcess => prevProcess.map((step, idx) => ({
+                      ...step,
+                      completed: idx === 2 ? statusCompleted : step.completed
+                    })));
+
                     const batch = list.slice(i, i + BATCH_SIZE);
                     const batchPromises = batch.map(obj =>
                       delay(10).then(async () => {

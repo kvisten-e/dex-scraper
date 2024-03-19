@@ -17,6 +17,7 @@ export default function ShowDexes() {
   const [status, setStatus] = useState("")
   const [wallets, setWallets] = useState([])
   const { switchButton, setSwitchButton } = useContext(GlobalContext)
+  const [totalTransactions, setTotalTransactions] = useState(0)
 
 
   useEffect(() => {
@@ -34,6 +35,8 @@ export default function ShowDexes() {
       { "total_min_tx": getParams.get("total_min_tx") },
     ];
 
+    setTotalTransactions(getParams.get("total_wallet_tx"))
+
     const paramsDataTS = [
       { "total_tx": getParams.get("total_tx") },
       { "min_tx_value": getParams.get("min_tx_value") },
@@ -46,7 +49,8 @@ export default function ShowDexes() {
     setProcess([
       { step: "1. Get transactions", completed: 0 },
       { step: "2. Find all spl-transfer of SOL", completed: 0 },
-      { step: "3. Get wallets that have distributed SOL ", completed: 0 }
+      { step: `3. Sort out wallets with more than ${getParams.get("tot_tra_wallet") } transactions`, completed: 0 },
+      { step: "4. Get wallets that have distributed SOL ", completed: 0 }
     ])
 
 
