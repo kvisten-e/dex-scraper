@@ -23,6 +23,8 @@ function Homepage(param) {
   const [miniumumTransactionValueCT, setMinumumTransactionValueCT] = useState(() => localStorage.getItem('miniumumTransactionValueCT') || '3');
   const [maximumTransactionValueCT, setMaximumTransactionValueCT] = useState(() => localStorage.getItem('maximumTransactionValueCT') || '20');
   const [minimumEqualTransactionsCT, setMinimumEqualTransactionsCT] = useState(() => localStorage.getItem('minimumEqualTransactionsCT') || '3');
+  const [totalWalletInWallet, setTotalWalletInWallet] = useState(() => localStorage.getItem('totalWalletInWallet') || '80');
+
   const [minimumValueEqualTransactionsCT, setMinimumValueEqualTransactionsCT] = useState(() => localStorage.getItem('minimumValueEqualTransactionsCT') || '0.4');
   const [totalMinimumTransactionsCT, setTotalMinimumTransactionsCT] = useState(() => localStorage.getItem('totalMinimumTransactionsCT') || '25')
   
@@ -47,6 +49,7 @@ function Homepage(param) {
       min_tx_value: miniumumTransactionValueCT,
       max_tx_value: maximumTransactionValueCT,
       min_eq_tx: minimumEqualTransactionsCT,
+      tot_tra_wallet: totalWalletInWallet,
       min_eq_value_tx: minimumValueEqualTransactionsCT,
       total_min_tx: totalMinimumTransactionsCT
     };
@@ -57,6 +60,7 @@ function Homepage(param) {
     localStorage.setItem('miniumumTransactionValueCT', miniumumTransactionValueCT);
     localStorage.setItem('maximumTransactionValueCT', maximumTransactionValueCT);
     localStorage.setItem('minimumEqualTransactionsCT', minimumEqualTransactionsCT);
+    localStorage.setItem('totalWalletInWallet', totalWalletInWallet);
     localStorage.setItem('minimumValueEqualTransactionsCT', minimumValueEqualTransactionsCT);
     localStorage.setItem('totalMinimumTransactionsCT', totalMinimumTransactionsCT)
   }, [totalTransactionsCT, miniumumTransactionValueCT, maximumTransactionValueCT, minimumEqualTransactionsCT, minimumValueEqualTransactionsCT, totalMinimumTransactionsCT]);
@@ -232,8 +236,12 @@ function Homepage(param) {
                     </div>
                   </div>
                   <div>
+                    <h4>Total transactions in found wallet from dex</h4>
+                    <input type="search" value={totalWalletInWallet} placeholder="Ex. 3" onChange={(e) => setMinimumEqualTransactionsCT(e.target.value)} />
+                  </div>
+                  <div>
                     <h4>Amount of equal sent transaction from each found wallets</h4>
-                    <input type="search" value={minimumEqualTransactionsCT} placeholder="Ex. 3" onChange={(e) => setMinimumEqualTransactionsCT(e.target.value)} />
+                    <input type="search" value={minimumEqualTransactionsCT} placeholder="Ex. 80" onChange={(e) => setTotalWalletInWallet(e.target.value)} />
                   </div>
                   <div>
                     <h4>Minimum value of each equal transaction out</h4>

@@ -100,11 +100,15 @@ export default function PresentResult(props) {
 
                       const confirmedTransactions = await checkSolAmountTransaction(wallet, listTransactions, Number(params[1].min_tx_value), Number(params[2].max_tx_value));
                       console.log("ConfirmedTransactionList: ", confirmedTransactions);
+                    
+                    const transactionsListFilteredLength = await getWalletTotalTransactions(confirmedTransactions, Number(params[4].tot_tra_wallet))
+                      console.log("TransactionsListFilteredLength: ", transactionsListFilteredLength)
+                    
                       let count = 1
-                      const transactionPromises = confirmedTransactions.map((obj, index) =>
+                      const transactionPromises = transactionsListFilteredLength.map((obj, index) =>
                         delay(index * 200).then(async () => {
 
-                          const checkForTransactions = await findTransactionsFromWallet(obj.wallet, params[3].min_eq_tx, params[4].min_eq_value_tx, params[5].total_min_tx)
+                          const checkForTransactions = await findTransactionsFromWallet(obj.wallet, params[3].min_eq_tx, params[5].min_eq_value_tx, params[6].total_min_tx)
 
                           let statusCompleted = (count++ / confirmedTransactions.length) * 100;
                           setProcess(prevProcess => prevProcess.map((step, idx) => ({
@@ -131,6 +135,35 @@ export default function PresentResult(props) {
                 }
                 return filteredResults;
               }
+
+              async function getWalletTotalTransactions(list, amount) {
+                let confirmedTransactionList = []
+                try {
+                  const BATCH_SIZE = 20;
+                  for (let i = 0; i < list.length; i += BATCH_SIZE) {
+                    if (signal.aborted) {
+                      confirmedTransactionList = [];
+                      return confirmedTransactionList;
+                    }
+                    const batch = list.slice(i, i + BATCH_SIZE);
+                    const batchPromises = batch.map(obj =>
+                      delay(10).then(async () => {
+                        const amountTransactions = await rotateRPC().getSignaturesForAddress(getPublickey(obj.wallet), { commitment: "finalized" })
+                        if (amountTransactions.length <= amount) {
+                          return obj;
+                        }
+                      })
+                    );
+
+                    let allTransactions = await Promise.all(batchPromises);
+                    allTransactions = allTransactions.filter(tx => tx !== undefined);
+                    confirmedTransactionList = confirmedTransactionList.concat(allTransactions)
+                  }
+                } catch (error) {
+                }
+
+                return confirmedTransactionList
+              }              
 
 
               async function checkSolAmountTransaction(wallet, list, min_amount, max_amount) {
@@ -196,13 +229,13 @@ export default function PresentResult(props) {
                         return transactions;
                       }
 
-                      let retries = 3; // Maximum number of retries
+                      let retries = 3; 
                       let success = false;
                       let transactionDetails;
                       while (!success && retries > 0) {
                         try {
                           transactionDetails = await rotateRPC().getParsedTransaction(signature, { commitment: 'finalized', maxSupportedTransactionVersion: 0 });
-                          success = true; // If getParsedTransaction succeeds, set success to true to exit the loop
+                          success = true; 
                         } catch (error) {
                           console.log(`Retrying due to error: ${error.message}. Retries left: ${retries - 1}`);
                           retries--;

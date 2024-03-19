@@ -29,6 +29,7 @@ export default function ShowDexes() {
       { "min_tx_value": getParams.get("min_tx_value") },
       { "max_tx_value": getParams.get("max_tx_value") },
       { "min_eq_tx": getParams.get("min_eq_tx") },
+      { "tot_tra_wallet": getParams.get("tot_tra_wallet") },      
       { "min_eq_value_tx": getParams.get("min_eq_value_tx") },
       { "total_min_tx": getParams.get("total_min_tx") },
     ];

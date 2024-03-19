@@ -28,6 +28,7 @@ function ShowWallet() {
       { "min_tx_value": getParams.get("min_tx_value") },
       { "max_tx_value": getParams.get("max_tx_value") },
       { "min_eq_tx": getParams.get("min_eq_tx") },
+      { "total_wallet_tx": getParams.get("total_wallet_tx")},
       { "min_eq_value_tx": getParams.get("min_eq_value_tx") },
       { "total_min_tx": getParams.get("total_min_tx") },
     ];
