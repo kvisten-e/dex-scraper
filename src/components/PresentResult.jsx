@@ -139,7 +139,7 @@ export default function PresentResult(props) {
               async function getWalletTotalTransactions(list, amount) {
                 let confirmedTransactionList = []
                 try {
-                  const BATCH_SIZE = 20;
+                  const BATCH_SIZE = 50;
                   for (let i = 0; i < list.length; i += BATCH_SIZE) {
                     if (signal.aborted) {
                       confirmedTransactionList = [];
