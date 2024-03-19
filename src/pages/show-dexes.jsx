@@ -72,8 +72,8 @@ export default function ShowDexes() {
   }, [defaultWallets]);
 
   useEffect(() => {
-    const allCompleted = process.every(obj => obj.completed === 100);
-    setStatus(allCompleted ? "Completed" : "Ongoing");
+    const allCompleted = process.every(obj => obj.completed >= 100);
+    setStatus(allCompleted ? "Completed" : "In process");
   }, [process]); 
 
 

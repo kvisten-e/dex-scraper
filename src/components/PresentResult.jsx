@@ -139,7 +139,7 @@ export default function PresentResult(props) {
               async function getWalletTotalTransactions(list, amount) {
                 let confirmedTransactionList = []
                 try {
-                  const BATCH_SIZE = 50;
+                  const BATCH_SIZE = 40;
                   for (let i = 0; i < list.length; i += BATCH_SIZE) {
                     if (signal.aborted) {
                       confirmedTransactionList = [];
@@ -162,7 +162,21 @@ export default function PresentResult(props) {
                       })
                     );
 
-                    let allTransactions = await Promise.all(batchPromises);
+
+                    let retries = 3;
+                    let success = false;
+                    let allTransactions;
+                    while (!success && retries > 0) {
+                      try {
+                        allTransactions = await Promise.all(batchPromises);
+                        success = true;
+                      } catch (error) {
+                        console.log(`Retrying due to error: ${error.message}. Retries left: ${retries - 1}`);
+                        retries--;
+                        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second before retrying
+                      }
+                    }
+
                     allTransactions = allTransactions.filter(tx => tx !== undefined);
                     confirmedTransactionList = confirmedTransactionList.concat(allTransactions)
                   }
