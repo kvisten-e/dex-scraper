@@ -241,7 +241,7 @@ function Homepage(param) {
                   </div>
                   <div>
                     <h4>Amount of equal sent transaction from each found wallets</h4>
-                    <input type="search" value={minimumEqualTransactionsCT} placeholder="Ex. 80" onChange={(e) => setTotalWalletInWallet(e.target.value)} />
+                    <input type="search" value={minimumEqualTransactionsCT} placeholder="Ex. 80" onChange={(e) => setMinimumEqualTransactionsCT(e.target.value)} />
                   </div>
                   <div>
                     <h4>Minimum value of each equal transaction out</h4>
