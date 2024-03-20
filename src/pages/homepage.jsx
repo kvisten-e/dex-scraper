@@ -237,7 +237,7 @@ function Homepage(param) {
                   </div>
                   <div>
                     <h4>Total transactions in found wallet from dex</h4>
-                    <input type="search" value={totalWalletInWallet} placeholder="Ex. 3" onChange={(e) => setMinimumEqualTransactionsCT(e.target.value)} />
+                    <input type="search" value={totalWalletInWallet} placeholder="Ex. 3" onChange={(e) => setTotalWalletInWallet(e.target.value)} />
                   </div>
                   <div>
                     <h4>Amount of equal sent transaction from each found wallets</h4>
