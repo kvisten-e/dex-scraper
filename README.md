@@ -28,7 +28,8 @@ This project is currently in development. Significant progress has been made, bu
 1. Ensure you have Node.js and npm installed on your system.
 2. Clone the repository to your local machine.
 3. Navigate to the project directory and install the dependencies with `npm install`.
-4. Start the development server with `npm run dev`.
+4. Set up a .env file with your RPCS ex. VITE_RPC_3 = "" & VITE_RPC_4 = ""
+5. Start the development server with `npm run dev`.
 
 
 ## Disclaimer
