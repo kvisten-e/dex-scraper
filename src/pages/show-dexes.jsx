@@ -49,8 +49,7 @@ export default function ShowDexes() {
     setProcess([
       { step: "1. Get transactions", completed: 0 },
       { step: "2. Find all spl-transfer of SOL", completed: 0 },
-      { step: `3. Sort out wallets with more than ${getParams.get("tot_tra_wallet") } transactions`, completed: 0 },
-      { step: "4. Get wallets that have distributed SOL ", completed: 0 }
+      { step: "3. Get wallets that have distributed SOL ", completed: 0 }
     ])
 
 

@@ -101,19 +101,19 @@ export default function PresentResult(props) {
                       const confirmedTransactions = await checkSolAmountTransaction(wallet, listTransactions, Number(params[1].min_tx_value), Number(params[2].max_tx_value));
                       console.log("ConfirmedTransactionList: ", confirmedTransactions);
                     
-                    const transactionsListFilteredLength = await getWalletTotalTransactions(confirmedTransactions, Number(params[4].tot_tra_wallet))
-                      console.log("TransactionsListFilteredLength: ", transactionsListFilteredLength)
+/*                     const transactionsListFilteredLength = await getWalletTotalTransactions(confirmedTransactions, Number(params[4].tot_tra_wallet))
+                      console.log("TransactionsListFilteredLength: ", transactionsListFilteredLength) */
                     
                       let count = 1
-                      const transactionPromises = transactionsListFilteredLength.map((obj, index) =>
+                    const transactionPromises = confirmedTransactions.map((obj, index) =>
                         delay(index * 200).then(async () => {
 
                           const checkForTransactions = await findTransactionsFromWallet(obj.wallet, params[3].min_eq_tx, params[5].min_eq_value_tx, params[6].total_min_tx)
 
-                          let statusCompleted = (count++ / transactionsListFilteredLength.length) * 100;
+                          let statusCompleted = (count++ / confirmedTransactions.length) * 100;
                           setProcess(prevProcess => prevProcess.map((step, idx) => ({
                             ...step,
-                            completed: idx === 3 ? statusCompleted : step.completed
+                            completed: idx === 2 ? statusCompleted : step.completed
                           })));
 
                           const wallets = checkForTransactions.map(transaction => transaction.wallets);

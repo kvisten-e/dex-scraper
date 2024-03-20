@@ -45,8 +45,7 @@ function ShowWallet() {
     setProcess([
       { step: "1. Get transactions", completed: 0 },
       { step: "2. Find all spl-transfer of SOL", completed: 0 },
-      { step: "3. Get found wallets total transactions", completed: 0 },
-      { step: "4. Get wallets that have distributed SOL ", completed: 0 }
+      { step: "3. Get wallets that have distributed SOL ", completed: 0 }
     ])
 
     if (!switchButton.checked) {
