@@ -1,13 +1,21 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate  } from "react-router-dom"
 
 function Nav() {
+  const navigate = useNavigate();
+  const handleNavigate = (path) => {
+    navigate(path, { replace: true, state: { needRefresh: true } });
+    window.location.reload(false);
+  };
+
   
   return (
     <nav>
-      <Link to="/">Scrape dex</Link>
-      <Link to="/saved-wallets">Save wallets</Link>
+      <button id="button-nav" onClick={() => handleNavigate("/")}>Scrape dex</button>
+      <button id="button-nav" onClick={() => handleNavigate("/saved-wallets")}>Save wallets</button>
     </nav>
-  )
+  );
+
+  
 
 }
 

@@ -64,6 +64,11 @@ export default function PresentResult(props) {
               }
 
               async function fetchMainWalletTransactions() {
+                if (!isMountedRef.current) {
+                  isMountedRef.current = true;
+                  return;
+                }
+
                 let filteredResults = [];
                 try {
                   let signatures = []
@@ -107,7 +112,6 @@ export default function PresentResult(props) {
 
                           // const checkForTransactions = await findTransactionsFromWallet(obj.wallet, params[3].min_eq_tx, params[5].min_eq_value_tx, params[6].total_min_tx)
                           const checkForTransactions = await getWalletTransactions(obj.wallet, params[3].min_eq_tx, params[5].min_eq_value_tx, obj.slot)
-                          
                           let statusCompleted = (count++ / confirmedTransactions[confirmedTransactions.length-1].id) * 100;
 
                           setProcess(prevProcess => prevProcess.map((step, idx) => ({
