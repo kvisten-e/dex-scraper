@@ -63,7 +63,7 @@ function ShowWallet() {
   }, []);
 
   useEffect(() => {
-    const allCompleted = process.every(obj => obj.completed === 100);
+    const allCompleted = process.every(obj => obj.completed >= 100);
     setStatus(allCompleted ? "Completed" : "In process");
   }, [process]); 
 

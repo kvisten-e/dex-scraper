@@ -5,8 +5,9 @@ export default class transactionData{
     this.wallet = wallet
   }
 
-  formatData(obj) {
-    if (this.wallet === obj.feePayer && obj.nativeTransfers.length > 0 && obj.source === "SYSTEM_PROGRAM") {
+  formatData(obj, slot) {
+
+    if (this.wallet === obj.feePayer && obj.nativeTransfers.length > 0 && obj.source === "SYSTEM_PROGRAM" && obj.slot >= slot) {
       const data = {
         "From": this.wallet,
         "To": obj.nativeTransfers[0].toUserAccount,

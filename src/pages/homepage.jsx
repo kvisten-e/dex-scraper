@@ -210,11 +210,11 @@ function Homepage(param) {
   return (
     <>
       <div id="main-page">
-        <label className="d-flex justify-content-center gap-3">
+{/*         <label className="d-flex justify-content-center gap-3">
           <p style={{color:"white"}}>Copy trader</p>
           <Switch onChange={handleChange} checked={switchButton.checked} offColor={"#646cff"} uncheckedIcon={false} checkedIcon={false} />
           <p style={{ color: "white" }}>Snipe tokens</p>
-        </label>  
+        </label>   */}
         {!switchButton.checked ? <div id="search-bar" style={{ border: "3px solid #646cff"}}>
           <IoSettingsSharp id="settings-icon" style={settings ? { color: "#646cff" } : { color: "white" }} onClick={() => setSettings(settings ? false : true)} />
           {settings && <div id="settings">
@@ -317,13 +317,13 @@ function Homepage(param) {
                 </div>
               </div>
             </div>}
-            <div id="search-func">
+{/*             <div id="search-func">
               <h2 className="mt-2">Token sniper</h2>
               <h3>Enter dex wallet</h3>
               <input type="search" value={address} id={hereId} placeholder="Enter A Solana address" onChange={(e) => setAddress(e.target.value)} />
               <button id="button-search" style={{ backgroundColor: "#080", borderColor: "#080" }}  onClick={() => { handleSearch() }}>Scrape wallet</button>
               <button id="button-search-all" onClick={() => { handleSearchAll() }}>Scrape ALL wallets</button>
-            </div>
+            </div> */}
             <div id="saved-wallets-homepage">
               {defaultWallets.map(obj => <Badge bg="secondary" onClick={() => { handleSearch(obj.address.trim()) }}>{obj.name}</Badge>)}
               {savedWallets.map(obj => <Badge bg="" style={{ backgroundColor: "#080" }} onClick={() => { handleSearch(obj.address.trim()) }}>{obj.name}</Badge>)}

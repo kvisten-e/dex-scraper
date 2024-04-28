@@ -106,20 +106,10 @@ export default function PresentResult(props) {
                         delay(index * 200).then(async () => {
 
                           // const checkForTransactions = await findTransactionsFromWallet(obj.wallet, params[3].min_eq_tx, params[5].min_eq_value_tx, params[6].total_min_tx)
-                          const checkForTransactions = await getWalletTransactions(obj.wallet, params[3].min_eq_tx, params[5].min_eq_value_tx, params[6].total_min_tx)
-                          console.log("checkForTransactions: ", checkForTransactions)
+                          const checkForTransactions = await getWalletTransactions(obj.wallet, params[3].min_eq_tx, params[5].min_eq_value_tx, obj.slot)
                           
-                          /* {
-                              "amount": 1,
-                              "wallets": [
-                                  "4dcYBeVC4gC149FQQ9CZKCU2JFo8Pex4Ap61ihyjwH3c",
-                                  "9mW9vugY5qK9c8B1H5GAPoukUdnbjGsPKEDGVkyqZAcQ",
-                                  "4dcYBeVC4gC149FQQ9CZKCU2JFo8Pex4Ap61ihyjwH3c"
-                              ]
-                          } */
+                          let statusCompleted = (count++ / confirmedTransactions[confirmedTransactions.length-1].id) * 100;
 
-
-                          let statusCompleted = (count++ / confirmedTransactions.length) * 100;
                           setProcess(prevProcess => prevProcess.map((step, idx) => ({
                             ...step,
                             completed: idx === 2 ? statusCompleted : step.completed
@@ -145,48 +135,54 @@ export default function PresentResult(props) {
                 return filteredResults;
               }
 
-              async function getWalletTransactions(wallet, min_eq_tx, min_eq_value_tx) {
-                const publicKeySearch = getPublickey(wallet);
-                const apiKey = import.meta.env.VITE_API_KEY
-                const url = `https://api.helius.xyz/v0/addresses/${publicKeySearch}/transactions?api-key=${apiKey}&limit=80&type=TRANSFER`
-                const response = await fetch(url);
-                const data = await response.json();
+              async function getWalletTransactions(wallet, min_eq_tx, min_eq_value_tx, slot) {
+                let success = false
+                while (!success) {
+                  try {
+                    const publicKeySearch = getPublickey(wallet);
+                    const apiKey = import.meta.env.VITE_API_KEY
+                    const url = `https://api.helius.xyz/v0/addresses/${publicKeySearch}/transactions?api-key=${apiKey}&limit=80&type=TRANSFER`
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error("Failed to fetch data");
+                    const data = await response.json();
 
-                const transactionDataData = new transactionData(wallet)
-                let formatedResult = []
+                    const transactionDataData = new transactionData(wallet)
+                    let formatedResult = []
 
-                for (const obj of data) {
-                  const result = transactionDataData.formatData(obj)
-                  if (result) {
-                    formatedResult.push(result)    
-                  }
-                }
-
-                function groupByAmount(data) {
-                  const grouped = data.reduce((acc, { To, Amount }) => {
-                    if (!acc[Amount]) {
-                      acc[Amount] = { amount: Amount, wallets: new Set() };
+                    for (const obj of data) {
+                      const result = transactionDataData.formatData(obj, slot)
+                      if (result) {
+                        formatedResult.push(result)    
+                      }
                     }
-                    acc[Amount].wallets.add(To);
-                    return acc;
-                  }, {});
 
-                  return Object.values(grouped).map(({ amount, wallets }) => ({
-                    amount: amount,
-                    wallets: Array.from(wallets)
-                  }));
+                    const groupedData = groupByAmount(formatedResult);
+                    const filterGroupedData = groupedData.filter(obj => obj.wallets.length >= min_eq_tx && obj.amount >= min_eq_value_tx) 
+                    success = true
+                    return filterGroupedData                    
+                  } catch {
+                    console.log("Fetch failed on wallet:",wallet,".. trying again")
+                  }                  
                 }
-                const groupedData = groupByAmount(formatedResult);
-                console.log("GroupedData: ", groupedData)
-                const filterGroupedData = groupedData.filter(obj => obj.wallets.length >= min_eq_tx && obj.amount >= min_eq_value_tx)
-                console.log("FilterGroupedData: ", filterGroupedData)
-                                
-                return filterGroupedData
               }              
+              function groupByAmount(data) {
+                const grouped = data.reduce((acc, { To, Amount }) => {
+                  if (!acc[Amount]) {
+                    acc[Amount] = { amount: Amount, wallets: new Set() };
+                  }
+                  acc[Amount].wallets.add(To);
+                  return acc;
+                }, {});
 
+                return Object.values(grouped).map(({ amount, wallets }) => ({
+                  amount: amount,
+                  wallets: Array.from(wallets)
+                }));
+              }
 
               async function checkSolAmountTransaction(wallet, list, min_amount, max_amount) {
                 let confirmedTransactionList = [];
+                let id = 1
                 try {
                   const BATCH_SIZE = 20;
                   for (let i = 0; i < list.length; i += BATCH_SIZE) {
@@ -220,7 +216,7 @@ export default function PresentResult(props) {
                             if (instruction.parsed && instruction.parsed.type === 'transfer') {
                               const transferAmount = instruction.parsed.info.lamports / LAMPORTS_PER_SOL;
                               if (transferAmount >= min_amount && transferAmount <= max_amount) {
-                                confirmedTransactionList.push({ "wallet": instruction.parsed.info.destination, "amount": transferAmount });
+                                confirmedTransactionList.push({ "id": id++ ,"wallet": instruction.parsed.info.destination, "amount": transferAmount, "slot": transactionDetails.slot });
                               }
                             }
                           }
@@ -232,77 +228,6 @@ export default function PresentResult(props) {
                   console.log(error);
                 }
                 return confirmedTransactionList;
-              }
-
-
-              async function findTransactionsFromWallet(wallet, min_eq_tx, min_eq_value_tx, total_min_tx) {
-                const publicKeySearch = getPublickey(wallet);
-                try {
-                  const signatures = await rotateRPC().getSignaturesForAddress(publicKeySearch, { limit: Number(total_min_tx) });
-                  if (signatures.length > 0) {
-                    const listTransactions = signatures.map(signature => signature.signature);
-                    let transactions = [];
-                    for (let signature of listTransactions) {
-                      if (signal.aborted) {
-                        transactions = [];
-                        return transactions;
-                      }
-
-                      let retries = 3; 
-                      let success = false;
-                      let transactionDetails;
-                      while (!success && retries > 0) {
-                        try {
-                          transactionDetails = await rotateRPC().getParsedTransaction(signature, { commitment: 'finalized', maxSupportedTransactionVersion: 0 });
-                          success = true; 
-                        } catch (error) {
-                          console.log(`Retrying due to error: ${error.message}. Retries left: ${retries - 1}`);
-                          retries--;
-                          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second before retrying
-                        }
-                      }
-
-                      if (success && transactionDetails) {
-                        for (const instruction of transactionDetails.transaction.message.instructions) {
-                          if (instruction.programId.toBase58() === SystemProgram.programId.toBase58() && instruction.parsed.info.source == wallet) {
-                            if (instruction.parsed && instruction.parsed.type === 'transfer') {
-                              const transferAmount = instruction.parsed.info.lamports / LAMPORTS_PER_SOL;
-                              if (transferAmount >= min_eq_value_tx) {
-                                transactions.push({ "wallet": instruction.parsed.info.destination, "amount": transferAmount });
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-
-                    let amountToWallets = {};
-                    transactions.forEach(({ wallet, amount }) => {
-                      if (!amountToWallets[amount]) {
-                        amountToWallets[amount] = [];
-                      }
-                      amountToWallets[amount].push(wallet);
-                    });
-
-                    let filteredAmountToWallets = Object.keys(amountToWallets).reduce((acc, amount) => {
-                      if (amountToWallets[amount].length >= Number(min_eq_tx)) {
-                        acc[amount] = amountToWallets[amount];
-                      }
-                      return acc;
-                    }, {});
-                    const findTransactionsFromWallet = Object.entries(filteredAmountToWallets).map(([amount, wallets]) => ({
-                      amount: Number(amount),
-                      wallets
-                    }));
-
-                    const allEqual = arr => arr.every(val => val === arr[0]);
-
-                    const filterOutAllEqualWallets = findTransactionsFromWallet.filter(obj => !allEqual(obj.wallets))
-                    return filterOutAllEqualWallets
-                  }
-                } catch (error) {
-                  console.log(error)
-                }
               }
 
               return jsonString
@@ -332,7 +257,7 @@ export default function PresentResult(props) {
   }, [wallet])
 
   useEffect(() => {
-    let ready = process.filter(step => step.completed === 100)
+    let ready = process.filter(step => step.completed >= 100)
     if (ready.length === 3 && ready !== null) {
       const sortedDataByPrice = finishedResult.sort((p1, p2) => (p1.amount < p2.amount) ? 1 : (p1.amount > p2.amount) ? -1 : 0)
       console.log("Result: ", sortedDataByPrice)
