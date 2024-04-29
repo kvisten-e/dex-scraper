@@ -112,8 +112,9 @@ export default function PresentResult(props) {
 
                           // const checkForTransactions = await findTransactionsFromWallet(obj.wallet, params[3].min_eq_tx, params[5].min_eq_value_tx, params[6].total_min_tx)
                           const checkForTransactions = await getWalletTransactions(obj.wallet, params[3].min_eq_tx, params[5].min_eq_value_tx, obj.slot)
-                          let statusCompleted = (count++ / confirmedTransactions[confirmedTransactions.length-1].id) * 100;
-
+                          let statusCompleted = (count++ / confirmedTransactions[confirmedTransactions.length - 1].id) * 100;
+                          
+                          console.log(count, "/", confirmedTransactions.length)
                           setProcess(prevProcess => prevProcess.map((step, idx) => ({
                             ...step,
                             completed: idx === 2 ? statusCompleted : step.completed
@@ -141,7 +142,8 @@ export default function PresentResult(props) {
 
               async function getWalletTransactions(wallet, min_eq_tx, min_eq_value_tx, slot) {
                 let success = false
-                while (!success) {
+                let attempts = 1
+                while (!success && attempts <= 4) {
                   try {
                     const publicKeySearch = getPublickey(wallet);
                     const apiKey = import.meta.env.VITE_API_KEY
@@ -165,9 +167,12 @@ export default function PresentResult(props) {
                     success = true
                     return filterGroupedData                    
                   } catch {
-                    console.log("Fetch failed on wallet:",wallet,".. trying again")
+                    console.log("Fetch failed on wallet:", wallet, ".. trying again on attempt: ", attempts)
+                    attempts++
                   }                  
                 }
+                console.log("Failed to fetch on wallet:", wallet, " .. skipping")
+                return []
               }              
               function groupByAmount(data) {
                 const grouped = data.reduce((acc, { To, Amount }) => {
