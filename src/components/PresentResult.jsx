@@ -3,6 +3,7 @@ import * as web3 from '@solana/web3.js';
 import { SystemProgram, SystemInstruction, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { GlobalContext } from './GlobalContext.jsx';
 import transactionData from "./transactionData.js"
+import { type } from "os";
 
 
 export default function PresentResult(props) {
@@ -70,6 +71,7 @@ export default function PresentResult(props) {
                 }
 
                 let filteredResults = [];
+                let confirmedTransactions = []
                 try {
                   let signatures = []
                   if (wallet.length === 1) {
@@ -82,10 +84,34 @@ export default function PresentResult(props) {
 
                   } else {
                     let count = 1
+                    
                     for (let eachWallet of wallet) {
-                      let signatureFetch = await rotateRPC().getSignaturesForAddress(getPublickey(eachWallet), { limit: Number(params[0].total_tx), commitment: "finalized" });
-                      signatures = signatures.concat(signatureFetch)
-                      
+
+                      const data = new transactionData(eachWallet)
+
+                      let attempts = 0;
+                      while (attempts < 3) {
+                        try {
+                          const listTransactions = await getDexTransactions(eachWallet)
+                          console.log("listTransactions: ", listTransactions)
+                          if (listTransactions.length > 0) {
+                            attempts = 3
+                            for (const transaction of listTransactions) {
+                              const formatedTransaction = data.formatDexTransaction(transaction, )
+                              if (formatedTransaction) {
+                              console.log("formatedTransaction: ", formatedTransaction)
+                              confirmedTransactions.push(formatedTransaction)                                
+                              }
+
+                            }                        
+                          }                          
+                        } catch {
+                          console.log("Something went wrong with fetch transactions for wallet: ", eachWallet, " - Attempt: ", attempts, "/3")
+                          attempts++
+                        }
+                      }
+                      console.log("confirmedTransactions: ", confirmedTransactions)
+
                       let statusCompleted = (count++ / wallet.length) * 100;
                       setProcess(prevProcess => prevProcess.map((step, index) => ({
                         ...step,
@@ -94,49 +120,56 @@ export default function PresentResult(props) {
                     }
                   }
 
-                  if (signatures.length > 0) {
-                    let listTransactions = []
-                    try {
-                      listTransactions = signatures.map(signature => signature.signature);
-                      console.log("List transactions: ", listTransactions);
-                    } catch (error) {
-                      console.log("signatures list failed ", error)
-                    }                      
+                  if (confirmedTransactions.length > 0) {
+                    console.log("ConfirmedTransactionList: ", confirmedTransactions);
+                  
+                    let count = 1
+                    const transactionPromises = confirmedTransactions.map((obj, index) =>
+                      delay(index * 200).then(async () => {
 
-                      const confirmedTransactions = await checkSolAmountTransaction(wallet, listTransactions, Number(params[1].min_tx_value), Number(params[2].max_tx_value));
-                      console.log("ConfirmedTransactionList: ", confirmedTransactions);
-                    
-                      let count = 1
-                      const transactionPromises = confirmedTransactions.map((obj, index) =>
-                        delay(index * 200).then(async () => {
+                        const checkForTransactions = await getWalletTransactions(obj.wallet, params[3].min_eq_tx, params[5].min_eq_value_tx, obj.slot)
+                        let statusCompleted = (count++ / confirmedTransactions.length) * 100;
 
-                          // const checkForTransactions = await findTransactionsFromWallet(obj.wallet, params[3].min_eq_tx, params[5].min_eq_value_tx, params[6].total_min_tx)
-                          const checkForTransactions = await getWalletTransactions(obj.wallet, params[3].min_eq_tx, params[5].min_eq_value_tx, obj.slot)
-                          let statusCompleted = (count++ / confirmedTransactions[confirmedTransactions.length-1].id) * 100;
+                        setProcess(prevProcess => prevProcess.map((step, idx) => ({
+                          ...step,
+                          completed: idx === 1 ? statusCompleted : step.completed
+                        })));
 
-                          setProcess(prevProcess => prevProcess.map((step, idx) => ({
-                            ...step,
-                            completed: idx === 2 ? statusCompleted : step.completed
-                          })));
+                        const wallets = checkForTransactions.map(transaction => transaction.wallets);
+                        if (wallets.length > 0 && wallets.length === new Set(wallets).size) {
+                          return { "wallet": obj.wallet, "amount": obj.amount, "walletSentOut": checkForTransactions };
+                        }
+                        return null;
+                      })
+                    );
 
-                          const wallets = checkForTransactions.map(transaction => transaction.wallets);
-                          if (wallets.length > 0 && wallets.length === new Set(wallets).size) {
-                            return { "wallet": obj.wallet, "amount": obj.amount, "walletSentOut": checkForTransactions };
-                          }
-                          return null;
-                        })
-                      );
-
-                      const allTransactionsResults = await Promise.all(transactionPromises);
-                      filteredResults = allTransactionsResults.filter(result => result !== null);                      
-
-
+                    const allTransactionsResults = await Promise.all(transactionPromises);
+                    filteredResults = allTransactionsResults.filter(result => result !== null);                      
                   }  
                   
                 } catch (error) {
                   console.error('Error fetching signatures:', error);
                 }
                 return filteredResults;
+              }
+
+              async function getDexTransactions(wallet){
+                const totalTx = Number(params[0].total_tx)
+                while (!success) {
+                  try {
+                    const publicKeySearch = getPublickey(wallet);
+                    const apiKey = import.meta.env.VITE_API_KEY
+                    const url = `https://api.helius.xyz/v0/addresses/${publicKeySearch}/transactions?api-key=${apiKey}&limit=${totalTx}&type=TRANSFER`
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error("Failed to fetch data");
+                    const data = await response.json();
+                    console.log("Data: ", data)
+                    success = true
+                    return data                 
+                  } catch {
+                    console.log("Fetch failed on dex: ",wallet," ..trying again")
+                  }                  
+                }                
               }
 
               async function getWalletTransactions(wallet, min_eq_tx, min_eq_value_tx, slot) {
@@ -182,56 +215,6 @@ export default function PresentResult(props) {
                   amount: amount,
                   wallets: Array.from(wallets)
                 }));
-              }
-
-              async function checkSolAmountTransaction(wallet, list, min_amount, max_amount) {
-                let confirmedTransactionList = [];
-                let id = 1
-                try {
-                  const BATCH_SIZE = 20;
-                  for (let i = 0; i < list.length; i += BATCH_SIZE) {
-                    if (signal.aborted) {
-                      confirmedTransactionList = [];
-                      return confirmedTransactionList;
-                    }
-
-                    let statusCompleted = ((i + BATCH_SIZE) / list.length) * 100;
-                    setProcess(prevProcess => prevProcess.map((step, idx) => ({
-                      ...step,
-                      completed: idx === 1 ? statusCompleted : step.completed
-                    })));
-
-                    const batch = list.slice(i, i + BATCH_SIZE);
-                    const batchPromises = batch.map(signature =>
-                      delay(10).then(async () =>
-                        rotateRPC().getParsedTransaction(signature, { commitment: 'finalized', maxSupportedTransactionVersion : 0})
-                          .catch(error => {
-                            console.log(error);
-                            return null;
-                          })
-                      )
-                    );
-
-                    const results = await Promise.all(batchPromises);
-                    for (const transactionDetails of results) {
-                      if (transactionDetails) {
-                        for (const instruction of transactionDetails.transaction.message.instructions) {
-                          if (instruction.programId.toBase58() === SystemProgram.programId.toBase58() && wallet.includes(instruction.parsed.info.source)) {
-                            if (instruction.parsed && instruction.parsed.type === 'transfer') {
-                              const transferAmount = instruction.parsed.info.lamports / LAMPORTS_PER_SOL;
-                              if (transferAmount >= min_amount && transferAmount <= max_amount) {
-                                confirmedTransactionList.push({ "id": id++ ,"wallet": instruction.parsed.info.destination, "amount": transferAmount, "slot": transactionDetails.slot });
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                } catch (error) {
-                  console.log(error);
-                }
-                return confirmedTransactionList;
               }
 
               return jsonString

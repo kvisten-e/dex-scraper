@@ -10061,7 +10061,7 @@ const mockdata = [
     }
 ]
 
-const data = new transactionData("4DZWkvtWwNCYknbBQoPiGqzeEBFLPzCy2tZTofUg1f1e")
+const data = new transactionData("5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9")
 let formatedResult = []
 
 for (const obj of mockdata) {
@@ -10109,6 +10109,13 @@ const mockdataForamtedResult = [
     Amount: 0.34
   }
 ]
+/*   {
+    From: '4DZWkvtWwNCYknbBQoPiGqzeEBFLPzCy2tZTofUg1f1e',
+    To: 'DWpwuwe68CnPXgv7XcBvABeAWNu87Bdxc81bLXQkUR5k',
+    Amount: 0.98
+  }, */
+
+/* "id": id++ ,"wallet": instruction.parsed.info.destination, "amount": transferAmount, "slot": transactionDetails.slot  */
 
 function groupByAmount(data) {
   const grouped = data.reduce((acc, { To, Amount }) => {
@@ -10127,6 +10134,5 @@ function groupByAmount(data) {
 }
 const groupedData = groupByAmount(mockdataForamtedResult);
 
-const filterGroupedData = groupedData.filter(obj => obj.wallets.length >= 2 && obj.amount >= 1)
-console.log(filterGroupedData);
+console.log(groupedData);
 
