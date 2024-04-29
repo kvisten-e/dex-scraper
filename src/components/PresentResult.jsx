@@ -86,23 +86,21 @@ export default function PresentResult(props) {
                     let count = 1
                     
                     for (let eachWallet of wallet) {
-
+                      console.log("Dex: ", eachWallet)
                       const data = new transactionData(eachWallet)
 
-                      let attempts = 0;
-                      while (attempts < 3) {
+                      let attempts = 1;
+                      while (attempts <= 3) {
                         try {
                           const listTransactions = await getDexTransactions(eachWallet)
                           console.log("listTransactions: ", listTransactions)
                           if (listTransactions.length > 0) {
-                            attempts = 3
+                            attempts = 4
                             for (const transaction of listTransactions) {
-                              const formatedTransaction = data.formatDexTransaction(transaction, )
+                              const formatedTransaction = data.formatDexTransaction(transaction, Number(params[1].min_tx_value), Number(params[2].max_tx_value))
                               if (formatedTransaction) {
-                              console.log("formatedTransaction: ", formatedTransaction)
                               confirmedTransactions.push(formatedTransaction)                                
                               }
-
                             }                        
                           }                          
                         } catch {
@@ -155,6 +153,7 @@ export default function PresentResult(props) {
 
               async function getDexTransactions(wallet){
                 const totalTx = Number(params[0].total_tx)
+                let success = false
                 while (!success) {
                   try {
                     const publicKeySearch = getPublickey(wallet);
@@ -245,7 +244,7 @@ export default function PresentResult(props) {
 
   useEffect(() => {
     let ready = process.filter(step => step.completed >= 100)
-    if (ready.length === 3 && ready !== null) {
+    if (ready.length === 2 && ready !== null) {
       const sortedDataByPrice = finishedResult.sort((p1, p2) => (p1.amount < p2.amount) ? 1 : (p1.amount > p2.amount) ? -1 : 0)
       console.log("Result: ", sortedDataByPrice)
 
