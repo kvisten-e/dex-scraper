@@ -109,7 +109,6 @@ export default function PresentResult(props) {
                         delay(index * 200).then(async () => {
 
                           const checkForTransactions = await findTransactionsFromWallet(obj.wallet, params[3].min_eq_tx, params[5].min_eq_value_tx, params[6].total_min_tx)
-
                           let statusCompleted = (count++ / confirmedTransactions.length) * 100;
                           setProcess(prevProcess => prevProcess.map((step, idx) => ({
                             ...step,
@@ -239,72 +238,80 @@ export default function PresentResult(props) {
 
               async function findTransactionsFromWallet(wallet, min_eq_tx, min_eq_value_tx, total_min_tx) {
                 const publicKeySearch = getPublickey(wallet);
-                try {
-                  const signatures = await rotateRPC().getSignaturesForAddress(publicKeySearch, { limit: Number(total_min_tx) });
-                  if (signatures.length > 0) {
+
+                let retriesFirst = 5; 
+                while (retriesFirst > 0) {
+                  try {
+                    const signatures = await rotateRPC().getSignaturesForAddress(publicKeySearch, { limit: Number(total_min_tx) });
+
+                    if (signatures.length > 0) {
                     const listTransactions = signatures.map(signature => signature.signature);
                     let transactions = [];
                     for (let signature of listTransactions) {
-                      if (signal.aborted) {
-                        transactions = [];
-                        return transactions;
-                      }
+                    if (signal.aborted) {
+                    return transactions;
+                    }
 
-                      let retries = 3; 
-                      let success = false;
-                      let transactionDetails;
-                      while (!success && retries > 0) {
-                        try {
-                          transactionDetails = await rotateRPC().getParsedTransaction(signature, { commitment: 'finalized', maxSupportedTransactionVersion: 0 });
-                          success = true; 
-                        } catch (error) {
-                          console.log(`Retrying due to error: ${error.message}. Retries left: ${retries - 1}`);
-                          retries--;
-                          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second before retrying
-                        }
-                      }
+                    let retries = 5; 
+                    let success = false;
+                    let transactionDetails;
+                    while (!success && retries > 0) {
+                    try {
+                    transactionDetails = await rotateRPC().getParsedTransaction(signature, { commitment: 'finalized', maxSupportedTransactionVersion: 0 });
+                    success = true; 
+                    } catch (error) {
+                    console.log(`Retrying due to error: ${error.message}. Retries left: ${retries - 1}`);
+                    retries--;
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second before retrying
+                    }
+                    }
 
-                      if (success && transactionDetails) {
-                        for (const instruction of transactionDetails.transaction.message.instructions) {
-                          if (instruction.programId.toBase58() === SystemProgram.programId.toBase58() && instruction.parsed.info.source == wallet) {
-                            if (instruction.parsed && instruction.parsed.type === 'transfer') {
-                              const transferAmount = instruction.parsed.info.lamports / LAMPORTS_PER_SOL;
-                              if (transferAmount >= min_eq_value_tx) {
-                                transactions.push({ "wallet": instruction.parsed.info.destination, "amount": transferAmount });
-                              }
-                            }
-                          }
-                        }
-                      }
+                    if (success && transactionDetails) {
+                    for (const instruction of transactionDetails.transaction.message.instructions) {
+                    if (instruction.programId.toBase58() === SystemProgram.programId.toBase58() && instruction.parsed.info.source == wallet) {
+                    if (instruction.parsed && instruction.parsed.type === 'transfer') {
+                    const transferAmount = instruction.parsed.info.lamports / LAMPORTS_PER_SOL;
+                    if (transferAmount >= min_eq_value_tx) {
+                    transactions.push({ "wallet": instruction.parsed.info.destination, "amount": transferAmount });
+                    }
+                    }
+                    }
+                    }
+                    } else {
+                    return []
+                    }
                     }
 
                     let amountToWallets = {};
                     transactions.forEach(({ wallet, amount }) => {
-                      if (!amountToWallets[amount]) {
-                        amountToWallets[amount] = [];
-                      }
-                      amountToWallets[amount].push(wallet);
+                    if (!amountToWallets[amount]) {
+                    amountToWallets[amount] = [];
+                    }
+                    amountToWallets[amount].push(wallet);
                     });
 
                     let filteredAmountToWallets = Object.keys(amountToWallets).reduce((acc, amount) => {
-                      if (amountToWallets[amount].length >= Number(min_eq_tx)) {
-                        acc[amount] = amountToWallets[amount];
-                      }
-                      return acc;
+                    if (amountToWallets[amount].length >= Number(min_eq_tx)) {
+                    acc[amount] = amountToWallets[amount];
+                    }
+                    return acc;
                     }, {});
                     const findTransactionsFromWallet = Object.entries(filteredAmountToWallets).map(([amount, wallets]) => ({
-                      amount: Number(amount),
-                      wallets
+                    amount: Number(amount),
+                    wallets
                     }));
 
                     const allEqual = arr => arr.every(val => val === arr[0]);
 
                     const filterOutAllEqualWallets = findTransactionsFromWallet.filter(obj => !allEqual(obj.wallets))
                     return filterOutAllEqualWallets
+                    }                    
+                  } catch (error) {
+                    console.log(error)
+                    console.log("Retries left: ", --retriesFirst)
                   }
-                } catch (error) {
-                  console.log(error)
                 }
+                return []
               }
 
               return jsonString
