@@ -31,27 +31,29 @@ nav {
   align-items: center;
 }
 
-nav>a {
+#button-nav {
   width: 33.3%;
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 150%;
+  border: none;
+  background-color: #242424;
 }
 
-nav>a:hover {
+#button-nav:hover {
   background-color: #212453;
   color: white;
 }
 
-a {
+#button-nav {
   font-weight: 500;
   color: #646cff;
   text-decoration: inherit;
 }
 
-a:hover {
+#button-nav:hover {
   color: #535bf2;
 }
 
