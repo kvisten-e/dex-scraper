@@ -1,0 +1,43 @@
+#main-pump {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 20px;
+  background-color: rgb(217, 217, 217);
+}
+
+
+.skeleton-loader {
+  margin: 10px 0;
+  padding: 20px;
+  border-radius: 4px;
+  background-color: #eee;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -468px 0;
+  }
+
+  100% {
+    background-position: 468px 0;
+  }
+}
+
+.skeleton-loader::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: linear-gradient(to right,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.8) 50%,
+      rgba(255, 255, 255, 0) 100%);
+  animation: shimmer 1.5s infinite;
+  background-size: 800px 104px;
+}
