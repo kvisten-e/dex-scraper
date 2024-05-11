@@ -339,8 +339,11 @@ async function pumpare() {
             // Få tag på startDeposit
             const transactions = await getWalletTransactions(token.creator)
             const createdAmount = await getFirstDeposit(transactions, token.created_timestamp, token.creator)
-            if (createdAmount != null) {
-                //console.log("createdAmount: ", createdAmount)
+            let amount
+            if (createdAmount == null) {
+                amount = null
+            } else {
+                amount = createdAmount[0].amount
             }
 
             let createdTimestampInSeconds = Math.floor(token.created_timestamp / 1000);
@@ -354,7 +357,7 @@ async function pumpare() {
             const tokenDetails = {
                 creator: token.creator,
                 token: token.mint,
-                startDeposit: createdAmount[0].amount,           
+                startDeposit: amount,           
                 timeToKOTH: `${calcDifferenceSeconds} seconds`,       
                 transactions: totTransactionsAmount
             }

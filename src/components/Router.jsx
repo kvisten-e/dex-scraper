@@ -7,6 +7,8 @@ import { GlobalProvider } from "./GlobalContext.jsx"
 import SavedWallets from "../pages/saveWallets.jsx"
 import { SavedWalletProvider } from "./SavedWalletContext.jsx"
 import ShowDexes from "../pages/show-dexes.jsx"
+import Pump from "../pages/pumpPage.jsx"
+
 
 function Router() {
   return (
@@ -17,6 +19,7 @@ function Router() {
           <Routes>
             <Route path="/" element={<Homepage />} />
             <Route path="/saved-wallets" element={<SavedWallets />} />
+            <Route path="/pump" element={<Pump />} />
             <Route exact path="/address/:address" element={<ShowWallet />} />
             <Route exact path="/all-dexes" element={<ShowDexes />} />
             <Route path="*" element={<Nomatch/>}/>
