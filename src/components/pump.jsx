@@ -212,8 +212,7 @@ export default function pumpTokens({ seconds, triggerAction }) {
         const result = await pumpare()
         setLoading(false)
         if (result) {
-
-          setResult(mockResult)      
+          setResult(result)      
         }  
       }
       main()
@@ -242,7 +241,7 @@ export default function pumpTokens({ seconds, triggerAction }) {
             </section>
           ))
         ) : (
-          !loading && !result.length > 0 && <p>No Tokens found</p>
+          !loading && !result && <p>No Tokens found</p>
         )}
       </div>  
     </>
