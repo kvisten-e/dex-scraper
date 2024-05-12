@@ -8,7 +8,7 @@ export default function snipeCreator() {
   
   const [minValue, setMinValue] = useState(60)
   const [maxValue, setMaxValue] = useState(80)
-  const [decimaler, setDecimaler] = useState(2)
+  const [decimaler, setDecimaler] = useState(50)
   const [maxTransactionsInWallet, setMaxTransactionsInWallet] = useState(3)
   const [dexChoice, setDexChoice] = useState('5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9');
   const [csvData, setCsvData] = useState([])
