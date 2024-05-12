@@ -233,8 +233,8 @@ export default function pumpTokens({ seconds, triggerAction }) {
         {!loading && result.length > 0 ? (
           result.map((obj, index) => (
             <section key={index}>
-              <h4>{obj.creator}</h4>
-              <p>Token: {obj.token}</p>
+              <h4><a href={"https://solscan.io/account/" + obj.creator + "#solTransfers"} target="_blank"> {index + 1}. {obj.creator}</a></h4>
+              <p>Token: <a href={"https://pump.fun/" + obj.token} target="_blank"> {obj.token}</a></p>
               <p>Start Deposit: {obj.startDeposit}</p>
               <p>Time to KOTH: {obj.timeToKOTH}</p>
               <p>Transactions: {obj.transactions}</p>
