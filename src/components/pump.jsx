@@ -212,65 +212,8 @@ export default function pumpTokens({ seconds, triggerAction }) {
         const result = await pumpare()
         setLoading(false)
         if (result) {
-/*           const mockResult =  [
-      {
-        creator: 'CfuhTSy6aCD7w76Cqj6nRZgWdHfvXjHQWGECuTkAWV1u',
-        token: 'Ccqmy1VmTbY4JDtKS8JJJkU1UFXF9ATfsKe45gdmiHjS',
-        startDeposit: 35,
-        timeToKOTH: '36 seconds',
-        transactions: 20
-      },
-      {
-        creator: '9inxarN6qbmdy8bC4cRzL42ML4oTybsvHET1FS6RV2Dk',
-        token: '3HKbgJGQ9Vej5ubSGcZN34tVPK8NUS1N3Rk2wyWq1x84',
-        startDeposit: 85,
-        timeToKOTH: '11 seconds',
-        transactions: 2
-      },
-      {
-        creator: '6T4WDcarh7JDyiYVsi9TK9pVxgok8C3RBhc9Huz3LZpc',
-        token: 'E4yoWMfzZSWyd9cEfUXqvzTmrYP9gZpopxzu9zqRs7Mh',
-        startDeposit: null,
-        timeToKOTH: '103 seconds',
-        transactions: 303
-      },
-      {
-        creator: 'ptdsUAMnBdtMPV2ER6uPeuAcNecxxB471dB9w6XyM8R',
-        token: '9SPAmYbAUYZhooNzinJ9ZRq7X96evBYuJafqa4rgWeMk',
-        startDeposit: 3,
-        timeToKOTH: '112 seconds',
-        transactions: 119
-      },
-      {
-        creator: 'DGuAXsjE8Gw23i4gXusupnWuxZcvXUUYGu63GgowMMey',
-        token: 'HoUEyYv6ReBYavqVLxXRe2xvXCNuypZ1VWFjVnG8WysM',
-        startDeposit: 2,
-        timeToKOTH: '477 seconds',
-        transactions: 229
-      },
-      {
-        creator: '9xahDJteG61pwPGZ3mduzvYUCKhgwSg2XccipcyRQmsX',
-        token: '6BJZwGEAJcyynwoSRcneFSo5ZgXC4kyoXb5U8PiMGpvb',
-        startDeposit: 0,
-        timeToKOTH: '796 seconds',
-        transactions: 130
-      },
-      {
-        creator: 'HgFxtzHfSGhFhuRYkmocBLf4jdfnb9Uc61XSodz8qsxC',
-        token: '4PDEMcrh6oSwpRpcnsYVVnXphH7QZaQDd5jRDyvDRMwZ',
-        startDeposit: 2,
-        timeToKOTH: '426 seconds',
-        transactions: 929
-      },
-      {
-        creator: 'Cq7SBUPVMqKB5L8SbPSqP4i17WRZEowLvSm4TTinRG8q',
-        token: '4Uz7bc2BaSrYRQfhDzcWqMQJG9N8G15pEB1rSHgwyxCv',
-        startDeposit: 2,
-        timeToKOTH: '183 seconds',
-        transactions: 204
-      }
-          ] */
-          setResult(result)      
+
+          setResult(mockResult)      
         }  
       }
       main()
@@ -299,7 +242,7 @@ export default function pumpTokens({ seconds, triggerAction }) {
             </section>
           ))
         ) : (
-          !loading && !result && <p>No Tokens found</p>
+          !loading && !result.length > 0 && <p>No Tokens found</p>
         )}
       </div>  
     </>

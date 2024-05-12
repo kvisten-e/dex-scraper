@@ -12,6 +12,7 @@ function Nav() {
     <nav>
       <button id="button-nav" onClick={() => handleNavigate("/")}>Scrape dex</button>
       <button id="button-nav" onClick={() => handleNavigate("/pump")}>Pump tokens</button>
+      <button id="button-nav" onClick={() => handleNavigate("/snipe")}>Snipe Creator</button>
       <button id="button-nav" onClick={() => handleNavigate("/saved-wallets")}>Save wallets</button>
     </nav>
   );
