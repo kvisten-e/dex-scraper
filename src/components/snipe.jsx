@@ -188,7 +188,7 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
         {!loading && result.length > 0 ? (
           result.map((obj, index) => (
             <section key={index}>
-              <p>Wallet: {obj.wallet}</p>
+              <p>Wallet: <a href={"https://solscan.io/account/" + obj.wallet + "#solTransfers"} target="_blank"> {obj.wallet}</a></p>
               <p>Amount: {obj.amount}</p>
             </section>
           ))
