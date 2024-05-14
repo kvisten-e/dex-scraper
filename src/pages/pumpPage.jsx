@@ -6,13 +6,13 @@ import Pump from '../components/pump.jsx'
 export default function pumpTokens() {
   
   const [seconds, setSeconds] = useState(900)
-  const [triggerPump, setTriggerPump] = useState(false);
+  const [triggerPump, setTriggerPump] = useState(0);
 
   const changeSeconds = (e) => {
     setSeconds(e.target.value)
   }
   const handlePumpTrigger = () => {
-    setTriggerPump(prev => !prev); 
+    setTriggerPump(prev => prev + 1); 
   };  
 
   return (
