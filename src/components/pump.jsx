@@ -271,6 +271,7 @@ export default function pumpTokens({ seconds, triggerAction }) {
               <p>Start Deposit: {obj.startDeposit}</p>
               <p>Time to KOTH: {obj.timeToKOTH}</p>
               <p>Transactions: {obj.transactions}</p>
+              <iframe src={"https://dexscreener.com/solana/"+obj.token+"?embed=1&theme=dark&trades=0&info=0"} style={{ height: '400px', width: '99%' }}></iframe>  
             </section>
           ))
         ) : (
