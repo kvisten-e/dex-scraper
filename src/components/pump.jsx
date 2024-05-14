@@ -28,14 +28,17 @@ export default function pumpTokens({ seconds, triggerAction }) {
 
             if (filterSlowKoth.length > 0) {
 
-                //console.log("filterSlowKoth: ", filterSlowKoth)
+                //Filtrera ut identiska rader
+                const removedDuplicates = removeDuplicates(filterSlowKoth); 
+                
+                console.log("FilterSlowKoth: ", removedDuplicates)
                 for (let token of filterSlowKoth) {
                     // Få tag på startDeposit
                     const transactions = await getWalletTransactions(token.creator)
                     const createdAmount = await getFirstDeposit(transactions, token.created_timestamp, token.creator)
                     let amount
-                    if (createdAmount == null) {
-                        amount = null
+                    if (createdAmount == null || createdAmount == '') {
+                        amount = 'Failed to fetch'
                     } else {
                         amount = createdAmount[0].amount
                     }
@@ -43,8 +46,6 @@ export default function pumpTokens({ seconds, triggerAction }) {
                     let createdTimestampInSeconds = Math.floor(token.created_timestamp / 1000);
                     let KothTimestampInSeconds = Math.floor(token.king_of_the_hill_timestamp / 1000);
                     let calcDifferenceSeconds = KothTimestampInSeconds - createdTimestampInSeconds
-
-                    //Få tag på antal transaktioner innan Raydium
 
                     const totTransactionsAmount = await totTransactions(token.bonding_curve)
 
@@ -64,10 +65,21 @@ export default function pumpTokens({ seconds, triggerAction }) {
             }
 
             async function totTransactions(bonding_curve) {
-                const signatures = await rotateRPC().getSignaturesForAddress(getPublickey(bonding_curve), {commitment: "finalized"});
-                //console.log("Signatures amount: ", signatures)
-                const filterErrSignatures = signatures.filter(signature => signature.err == null)
-                return filterErrSignatures.length
+                let retriesFirst = 5;
+                while (retriesFirst > 0) {
+                    try {
+                        const signatures = await rotateRPC().getSignaturesForAddress(getPublickey(bonding_curve), { commitment: "finalized" });
+
+                        const filterErrSignatures = signatures.filter(signature => signature.err == null)
+                        return filterErrSignatures.length
+                    }
+                    catch (error)
+                    {
+                    console.log(error)
+                    console.log("Retries left: ", --retriesFirst)
+                    }
+                }   
+                return 'Failed to fetch'
             }
 
             async function getTokens(amount) {
@@ -116,12 +128,23 @@ export default function pumpTokens({ seconds, triggerAction }) {
             }
 
             async function getWalletTransactions(wallet) {
-                const signatures = await rotateRPC().getSignaturesForAddress(getPublickey(wallet), { limit: 500, commitment: "finalized" });
-                if (signatures) {
-                    return signatures
+                let retriesFirst = 5;
+                while (retriesFirst > 0) {
+                    try {
+                        const signatures = await rotateRPC().getSignaturesForAddress(getPublickey(wallet), { limit: 500, commitment: "finalized" });
+                        if (signatures) {
+                            return signatures
+                        }
+                        return []  
+                    }
+                    catch (error)
+                    {
+                    console.log(error)
+                    console.log("Retries left: ", --retriesFirst)
+                    }
                 }
-                return []
-
+                console.log("Skipping wallet: ", wallet)
+                return []  
             }
 
             async function getFirstDeposit(arr, timestamp, wallet) {
@@ -207,7 +230,17 @@ export default function pumpTokens({ seconds, triggerAction }) {
             }
             }
 
-            return tokens
+            function removeDuplicates(arr) {
+
+                let jsonObject = arr.map(JSON.stringify);
+                let uniqueSet = new Set(jsonObject);
+                let uniqueArray = Array.from(uniqueSet).map(JSON.parse);
+
+                return uniqueArray
+            }
+                     
+            const filterDup = removeDuplicates(tokens)
+            return filterDup
         }
         const result = await pumpare()
         setLoading(false)
