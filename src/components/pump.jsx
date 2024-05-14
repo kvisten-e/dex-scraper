@@ -48,13 +48,23 @@ export default function pumpTokens({ seconds, triggerAction }) {
                     let calcDifferenceSeconds = KothTimestampInSeconds - createdTimestampInSeconds
 
                     const totTransactionsAmount = await totTransactions(token.bonding_curve)
+                    
+                    let raydiumResult = null
+                    let getMC = null
+                    if (token.raydium_pool !== null) {
+                        raydiumResult = token.raydium_pool
+                        getMC = await fetchMc(token.mint)
+                        getMC = `$${Math.round(getMC/1000)}K`
+                    }
 
                     const tokenDetails = {
                         creator: token.creator,
                         token: token.mint,
                         startDeposit: amount,           
                         timeToKOTH: `${calcDifferenceSeconds} seconds`,       
-                        transactions: totTransactionsAmount
+                        transactions: totTransactionsAmount,
+                        raydium: raydiumResult,
+                        fdv: getMC
                     }
                     
                     tokens.push(tokenDetails)
@@ -62,6 +72,17 @@ export default function pumpTokens({ seconds, triggerAction }) {
             } else {
                 console.log("FilterSlowKoth is empty")
             
+            }
+
+            async function fetchMc(address) {
+                try {
+                    const response = await fetch("https://api.dexscreener.com/latest/dex/search?q=" + address)
+                    const getData = await response.json()
+                    const mc = getData.pairs[0].fdv
+                    return mc
+                } catch {
+                    console.log("Failed to fetch mc for " + address)                    
+                }
             }
 
             async function totTransactions(bonding_curve) {
@@ -271,7 +292,11 @@ export default function pumpTokens({ seconds, triggerAction }) {
               <p>Start Deposit: {obj.startDeposit}</p>
               <p>Time to KOTH: {obj.timeToKOTH}</p>
               <p>Transactions: {obj.transactions}</p>
-              <iframe src={"https://dexscreener.com/solana/"+obj.token+"?embed=1&theme=dark&trades=0&info=0"} style={{ height: '400px', width: '99%' }}></iframe>  
+              {obj.fdv !== null ? <p>Mkt Cap: {obj.fdv}</p> : <></>}
+                        
+              {obj.raydium !== null ? 
+              <iframe src={"https://dexscreener.com/solana/" + obj.token + "?embed=1&theme=dark&trades=0&info=0"} style={{ height: '400px', width: '99%' }}></iframe> 
+               : <p>Not on Radium yet</p>} 
             </section>
           ))
         ) : (
@@ -281,3 +306,4 @@ export default function pumpTokens({ seconds, triggerAction }) {
     </>
   );
 }
+
