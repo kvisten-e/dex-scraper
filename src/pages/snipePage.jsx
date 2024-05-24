@@ -23,11 +23,12 @@ export default function snipeCreator() {
     fetch('./src/assets/dex.csv')
       .then(response => response.text())
       .then(csvText => {
-        const parsedData = csvParse(csvText, d => ({
+        let parsedData = csvParse(csvText, d => ({
           name: d.dex.trim(),
           address: d.address.trim()
         }));
-        parsedData.push(savedWallets[0])
+        console.log(savedWallets)
+        parsedData = parsedData.concat(savedWallets)
 
         console.log(parsedData)
         setCsvData(parsedData);
