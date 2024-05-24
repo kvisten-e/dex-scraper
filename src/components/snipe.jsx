@@ -3,7 +3,7 @@ import * as web3 from '@solana/web3.js';
 import { SystemProgram, SystemInstruction, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { GlobalContext } from './GlobalContext.jsx';
 
-export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, maxTransactionsInWalletProp, dexChoiceProp, triggerAction }) {
+export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, maxTransactionsInWalletProp, dexChoiceProp, triggerAction, allDex, allDexArr }) {
 
   const { params } = useContext(GlobalContext)
   const { signal } = useContext(GlobalContext)
@@ -14,6 +14,8 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
   const [maxValue, setMaxValue] = useState(0)
   const [decimaler, setDecimaler] = useState(0)
   const [wallet, setWallet] = useState('')
+  const [allDexBool, setAllDexBool] = useState()
+  const [allDexArrFetch, setAllDexBoolFetch] = useState([])
   const [maxTransactionsInWallet, setMaxTransactionsInWallet] = useState(0)
   const [resultList, setResultList] = useState([])
   const [buttonClickCounter, setButtonClickCounter] = useState(0)
@@ -22,7 +24,11 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
     if (triggerAction) {
       async function main() {
         setLoading(true); 
-        await snipare(minValue, maxValue, decimaler, wallet, maxTransactionsInWallet)
+        if (!allDexBool) {
+          await snipare(minValue, maxValue, decimaler, wallet, maxTransactionsInWallet)          
+        } else {
+          await snipare(minValue, maxValue, decimaler, allDexArrFetch, maxTransactionsInWallet) 
+        }
         console.log("Result: ", resultList)
         setLoading(false)
         if (resultList) {
@@ -34,16 +40,26 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
 
       async function snipare(minValueNew, maxValueNew, decimalerNew, walletNew, maxTransactionsInWalletNew ) {
 
-          const rotateRPC = createRPCRotator();
-          const transactions = await getTransactions(wallet)
-          const signatureValue = await getSignatureValue(walletNew, transactions, minValueNew, maxValueNew, decimalerNew)
-          console.log("signatureValue: ", signatureValue)
+        const rotateRPC = createRPCRotator();
+        
+        let signatureValue = [];
+        if (typeof walletNew === 'object') {
+          for (let wallet of walletNew) {
+            const transactions = await getTransactions(wallet.address)
+            const newSignatureValue = await getSignatureValue(wallet.address, transactions, minValueNew, maxValueNew, decimalerNew)
+            signatureValue = signatureValue.concat(newSignatureValue)
+          }  
+
+        } else {
+        const transactions = await getTransactions(wallet)
+        signatureValue = await getSignatureValue(walletNew, transactions, minValueNew, maxValueNew, decimalerNew)
+        }
+
+        console.log("signatureValue: ", signatureValue)          
           if (signatureValue.length > 0) {
               for (let eachWallet of signatureValue) {
                 const result = await getWalletTransactions(eachWallet.wallet)
-                console.log("Result length: ", result.length)
                 if (result.length <= maxTransactionsInWalletNew) {
-                      console.log("Lägger till: ", eachWallet)
                       resultList.push(eachWallet)
                   }
             }
@@ -74,10 +90,6 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
           try {
               const BATCH_SIZE = 20;
               for (let i = 0; i < list.length; i += BATCH_SIZE) {
-      /*         if (signal.aborted) {
-                  confirmedTransactionList = [];
-                  return confirmedTransactionList;
-              } */
 
               const batch = list.slice(i, i + BATCH_SIZE);
               const batchPromises = batch.map(signature =>
@@ -170,12 +182,14 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
 
   useEffect(() => {
     
-    console.log({ 'minValue': minValueProp, 'maxValue': maxValueProp, 'decimaler': decimalerProp, 'maxTransactionsInWallet': maxTransactionsInWalletProp, 'dexChoiceProp': dexChoiceProp, "triggerAction": triggerAction})
+    console.log({ 'minValue': minValueProp, 'maxValue': maxValueProp, 'decimaler': decimalerProp, 'maxTransactionsInWallet': maxTransactionsInWalletProp, 'dexChoiceProp': dexChoiceProp, "triggerAction": triggerAction, "allDex": allDex, "allDexArr": allDexArr})
     setMinValue(minValueProp)
     setMaxValue(maxValueProp)
     setDecimaler(decimalerProp)
     setWallet(dexChoiceProp)
     setMaxTransactionsInWallet(maxTransactionsInWalletProp)
+    setAllDexBool(allDex)
+    setAllDexBoolFetch(allDexArr)
     setButtonClickCounter(prev => prev + 1)
   },[triggerAction])
 

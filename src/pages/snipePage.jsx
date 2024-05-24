@@ -3,19 +3,23 @@ import { useEffect, useState, useRef, useContext } from 'react';
 import { GlobalContext } from '../components/GlobalContext.jsx';
 import Snipe from '../components/snipe.jsx'
 import { csvParse } from 'd3-dsv';
+import { SavedContext } from "../components/SavedWalletContext.jsx";
 
 export default function snipeCreator() {
   
-  const [minValue, setMinValue] = useState(60)
-  const [maxValue, setMaxValue] = useState(80)
-  const [decimaler, setDecimaler] = useState(50)
-  const [maxTransactionsInWallet, setMaxTransactionsInWallet] = useState(10)
+  const [minValue, setMinValue] = useState(() => localStorage.getItem('minValue') || '60')
+  const [maxValue, setMaxValue] = useState(() => localStorage.getItem('maxValue') || '80')
+  const [decimaler, setDecimaler] = useState(() => localStorage.getItem('decimaler') || '50')
+  const [maxTransactionsInWallet, setMaxTransactionsInWallet] = useState(() => localStorage.getItem('maxTransactionsInWallet') || '10')
   const [dexChoice, setDexChoice] = useState('5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9');
   const [csvData, setCsvData] = useState([])
+  const { savedWallets, defaultWallets } = useContext(SavedContext)
+  const[allDex, setAllDex] = useState(false)
 
   const [triggerCount, setTriggerCount] = useState(0);
 
   useEffect(() => {
+    
     fetch('./src/assets/dex.csv')
       .then(response => response.text())
       .then(csvText => {
@@ -23,11 +27,21 @@ export default function snipeCreator() {
           name: d.dex.trim(),
           address: d.address.trim()
         }));
+        parsedData.push(savedWallets[0])
+
+        console.log(parsedData)
         setCsvData(parsedData);
       })
       .catch(error => console.error('Error reading the CSV file:', error));
   }, []);
 
+
+  useEffect(() => {
+    localStorage.setItem('minValue', minValue);
+    localStorage.setItem('maxValue', maxValue);
+    localStorage.setItem('decimaler', decimaler);
+    localStorage.setItem('maxTransactionsInWallet', maxTransactionsInWallet);
+  }, [minValue, maxValue, decimaler, maxTransactionsInWallet])
 
   const changeMinValue = (e) => {
     setMinValue(Number(e.target.value));
@@ -51,6 +65,11 @@ export default function snipeCreator() {
 
 
   const handleSnipeTrigger = () => {
+    setAllDex(false)
+    setTriggerCount(prev => prev + 1); 
+  } 
+  const handleSnipeTriggerAll = () => {  
+    setAllDex(true)  
     setTriggerCount(prev => prev + 1); 
   } 
 
@@ -84,9 +103,10 @@ export default function snipeCreator() {
             </select>
           </div>           
           <button onClick={handleSnipeTrigger}>Search for wallets</button>
+          <button onClick={handleSnipeTriggerAll}>Search for wallet on all</button>
         </div>
         <div id="seconds-pump">
-          <Snipe minValueProp={minValue} maxValueProp={maxValue} decimalerProp={decimaler} maxTransactionsInWalletProp={maxTransactionsInWallet} dexChoiceProp={dexChoice} triggerAction={triggerCount} />
+          <Snipe minValueProp={minValue} maxValueProp={maxValue} decimalerProp={decimaler} maxTransactionsInWalletProp={maxTransactionsInWallet} dexChoiceProp={dexChoice} triggerAction={triggerCount} allDex={allDex} allDexArr={csvData} />
         </div>
       </div>
     </>
