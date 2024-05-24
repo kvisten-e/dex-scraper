@@ -28,9 +28,10 @@ export default function snipeCreator() {
           address: d.address.trim()
         }));
         console.log(savedWallets)
-        parsedData = parsedData.concat(savedWallets)
-
-        console.log(parsedData)
+        if (savedWallets.length > 0) {
+          parsedData = parsedData.concat(savedWallets)          
+        }
+        console.log("parsedData: ", parsedData)
         setCsvData(parsedData);
       })
       .catch(error => console.error('Error reading the CSV file:', error));
