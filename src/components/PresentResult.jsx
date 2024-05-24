@@ -3,6 +3,8 @@ import * as web3 from '@solana/web3.js';
 import { SystemProgram, SystemInstruction, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { GlobalContext } from './GlobalContext.jsx';
 import transactionData from "./transactionData.js"
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 export default function PresentResult(props) {
@@ -16,6 +18,17 @@ export default function PresentResult(props) {
   const [loading, setLoading] = useState(true);
   const isMountedRef = useRef(false);
   const [finishedResult, setfinishedResult] = useState([])
+
+  const notify = (err) => toast.error(err, {
+                    position: "bottom-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                    });
 
 
   useEffect(() => {
@@ -100,6 +113,7 @@ export default function PresentResult(props) {
                       listTransactions = signatures.map(signature => signature.signature);
                       console.log("List transactions: ", listTransactions);
                     } catch (error) {
+                      notify(error.message)
                       console.log("signatures list failed ", error)
                     }                      
 
@@ -132,6 +146,7 @@ export default function PresentResult(props) {
                   }  
                   
                 } catch (error) {
+                  notify(error.message)
                   console.error('Error fetching signatures:', error);
                 }
                 return filteredResults;
@@ -163,7 +178,8 @@ export default function PresentResult(props) {
                     const filterGroupedData = groupedData.filter(obj => obj.wallets.length >= min_eq_tx && obj.amount >= min_eq_value_tx) 
                     success = true
                     return filterGroupedData                    
-                  } catch {
+                  } catch (error) {
+                    notify(error.message)
                     console.log("Fetch failed on wallet:", wallet, ".. trying again on attempt: ", attempts)
                     attempts++
                   }                  
@@ -208,6 +224,7 @@ export default function PresentResult(props) {
                       delay(10).then(async () =>
                         rotateRPC().getParsedTransaction(signature, { commitment: 'finalized', maxSupportedTransactionVersion : 0})
                           .catch(error => {
+                            notify(error.message)
                             console.log(error);
                             return null;
                           })
@@ -231,6 +248,7 @@ export default function PresentResult(props) {
                     }
                   }
                 } catch (error) {
+                  notify(error.message)
                   console.log(error);
                 }
                 return confirmedTransactionList;
@@ -261,6 +279,7 @@ export default function PresentResult(props) {
                     transactionDetails = await rotateRPC().getParsedTransaction(signature, { commitment: 'finalized', maxSupportedTransactionVersion: 0 });
                     success = true; 
                     } catch (error) {
+                    notify(error.message)
                     console.log(`Retrying due to error: ${error.message}. Retries left: ${retries - 1}`);
                     retries--;
                     await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second before retrying
@@ -308,6 +327,7 @@ export default function PresentResult(props) {
                     return filterOutAllEqualWallets
                     }                    
                   } catch (error) {
+                    notify(error.message)
                     console.log(error)
                     console.log("Retries left: ", --retriesFirst)
                   }
@@ -325,7 +345,8 @@ export default function PresentResult(props) {
           const result = await fetchData()
           setfinishedResult(result)
           success = true
-        } catch {
+        } catch (error) {
+          notify(error.message)
           setProcess([])
           console.log("Failed to fetch, starting again...")
         }
@@ -353,6 +374,8 @@ export default function PresentResult(props) {
     }
   })
 
+
+
   return <>
     <div className="found-transactions">
       {loading ? <p></p> : sortedData && sortedData.length > 0 ?
@@ -368,6 +391,20 @@ export default function PresentResult(props) {
           </ul>
         </section>) : <p>Hej</p>
         : <p>No Transactions found</p>}
+        <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        limit={1}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+        />
     </div>
+
   </>
 }

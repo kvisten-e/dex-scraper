@@ -6,7 +6,8 @@ import { SavedContext } from "../components/SavedWalletContext.jsx";
 import { GlobalContext } from "../components/GlobalContext.jsx";
 import Badge from 'react-bootstrap/Badge';
 import Switch from "react-switch";
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Homepage(param) {
   const { savedWallets, defaultWallets } = useContext(SavedContext)
@@ -157,7 +158,21 @@ function Homepage(param) {
     setSwitchButton({ checked });
   }
 
+  const notify = (err) => toast.error(err, {
+                        position: "bottom-right",
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "dark",
+                        });
+
   const handleSearch = (valueButton) => {
+
+    notify("Skriv in en address")
+
     const walletToCheck = valueButton || address
     if (!walletToCheck || checkAddress(valueButton)) {
       setHereId('input-wallet-wrong');
@@ -207,14 +222,11 @@ function Homepage(param) {
 
   }
 
+  
+
   return (
     <>
       <div id="main-page">
-{/*         <label className="d-flex justify-content-center gap-3">
-          <p style={{color:"white"}}>Copy trader</p>
-          <Switch onChange={handleChange} checked={switchButton.checked} offColor={"#646cff"} uncheckedIcon={false} checkedIcon={false} />
-          <p style={{ color: "white" }}>Snipe tokens</p>
-        </label>   */}
         {!switchButton.checked ? <div id="search-bar" style={{ border: "3px solid #646cff"}}>
           <IoSettingsSharp id="settings-icon" style={settings ? { color: "#646cff" } : { color: "white" }} onClick={() => setSettings(settings ? false : true)} />
           {settings && <div id="settings">
@@ -341,7 +353,18 @@ function Homepage(param) {
               </div>
             </div>
           </div>}
-
+          <ToastContainer
+          position="bottom-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+          />
       </div>
     </>
   );

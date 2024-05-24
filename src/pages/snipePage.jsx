@@ -37,7 +37,6 @@ export default function snipeCreator() {
       .catch(error => console.error('Error reading the CSV file:', error));
   }, []);
 
-
   useEffect(() => {
     localStorage.setItem('minValue', minValue);
     localStorage.setItem('maxValue', maxValue);
