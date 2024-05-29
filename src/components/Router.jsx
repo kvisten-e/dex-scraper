@@ -9,13 +9,15 @@ import { SavedWalletProvider } from "./SavedWalletContext.jsx"
 import ShowDexes from "../pages/show-dexes.jsx"
 import Pump from "../pages/pumpPage.jsx"
 import Snipe from "../pages/snipePage.jsx"
-
+import AudioButton from "./playbutton.jsx";
 
 
 function Router() {
   return (
     <GlobalProvider>
       <BrowserRouter>
+      <AudioButton url="../../public/pump.mp3"/>
+        
         <Nav />
         <SavedWalletProvider>
           <Routes>
