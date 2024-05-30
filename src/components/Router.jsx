@@ -16,7 +16,7 @@ function Router() {
   return (
     <GlobalProvider>
       <BrowserRouter>
-      <AudioButton url="../../public/pump.mp3"/>
+      <AudioButton url="/pump.mp3"/>
         
         <Nav />
         <SavedWalletProvider>
