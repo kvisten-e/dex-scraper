@@ -115,7 +115,7 @@ export default function pumpTokens({ seconds, triggerAction }) {
                 for (let i = 0; i < apiLoops; i++){
                     try {
                         let amount = 50 * i
-                        const response = await fetch(`https://client-api-2-74b1891ee9f9.herokuapp.com/coins?offset=${amount}&limit=50&sort=last_trade_timestamp&order=DESC&includeNsfw=false`) 
+                        const response = await fetch(`https://frontend-api.pump.fun/coins?offset=${amount}&limit=50&sort=last_trade_timestamp&order=DESC&includeNsfw=false`)
                         const data = await response.json()
                         if (data) {
                             for (let token of data) {
