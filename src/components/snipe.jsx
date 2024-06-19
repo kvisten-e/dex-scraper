@@ -30,6 +30,13 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
           await snipare(minValue, maxValue, decimaler, allDexArrFetch, maxTransactionsInWallet) 
         }
         console.log("Result: ", resultList)
+        
+        resultList.sort((a, b) => {
+          const dateA = new Date(a.time);
+          const dateB = new Date(b.time);
+          return dateB - dateA;
+        });   
+        
         setLoading(false)
         if (resultList) {
           setResultList([])
@@ -46,24 +53,34 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
         if (typeof walletNew === 'object') {
           for (let wallet of walletNew) {
             const transactions = await getTransactions(wallet.address)
-            const newSignatureValue = await getSignatureValue(wallet.address, transactions, minValueNew, maxValueNew, decimalerNew)
+            console.log("Fetched: ", wallet)
+            const newSignatureValue = await getSignatureValue(wallet.address, transactions, minValueNew, maxValueNew, decimalerNew, wallet.name)
+            console.log("Transactions for : ", wallet)
             signatureValue = signatureValue.concat(newSignatureValue)
           }  
 
         } else {
         const transactions = await getTransactions(wallet)
-        signatureValue = await getSignatureValue(walletNew, transactions, minValueNew, maxValueNew, decimalerNew)
+        signatureValue = await getSignatureValue(walletNew, transactions, minValueNew, maxValueNew, decimalerNew, null)
         }
 
         console.log("signatureValue: ", signatureValue)          
-          if (signatureValue.length > 0) {
-              for (let eachWallet of signatureValue) {
-                const result = await getWalletTransactions(eachWallet.wallet)
-                if (result.length <= maxTransactionsInWalletNew) {
-                      resultList.push(eachWallet)
-                  }
+        if (signatureValue.length > 0) {
+          const promises = signatureValue.map(async (eachWallet) => {
+            const result = await getWalletTransactions(eachWallet.wallet);
+            if (result.length <= maxTransactionsInWalletNew) {
+              return eachWallet;
             }
-          }
+            return null;
+          });
+
+          const results = await Promise.all(promises);
+          results.forEach((eachWallet) => {
+            if (eachWallet !== null) {
+              resultList.push(eachWallet);
+            }
+          });
+        }
 
 
         async function getWalletTransactions(wallet) {
@@ -84,7 +101,7 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
 
           }
 
-          async function getSignatureValue(wallet, list, min_amount, max_amount, decimaler) {
+          async function getSignatureValue(wallet, list, min_amount, max_amount, decimaler, dex) {
           let confirmedTransactionList = [];
           let id = 1
           try {
@@ -110,8 +127,9 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
                           if (instruction.parsed && instruction.parsed.type === 'transfer') {
                               const transferAmount = instruction.parsed.info.lamports / LAMPORTS_PER_SOL;
                               const deci = countDecimals(transferAmount)
-                              if (transferAmount >= min_amount && transferAmount <= max_amount && deci <= decimaler) {
-                              confirmedTransactionList.push({"wallet": instruction.parsed.info.destination, "amount": transferAmount});
+                            if (transferAmount >= min_amount && transferAmount <= max_amount && deci <= decimaler) {
+                              const time = getFormattedDate(transactionDetails.blockTime)
+                              confirmedTransactionList.push({"wallet": instruction.parsed.info.destination, "amount": transferAmount, "time": time, "dex": dex});
                               }
                           }
                           }
@@ -153,7 +171,20 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
               return new web3.Connection(RPCs[0], 'confirmed');
           }
 
-          }
+        }
+        
+        function getFormattedDate(timestamp) {
+          var a = new Date(timestamp * 1000);
+          var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+          var year = a.getFullYear();
+          var month = months[a.getMonth()];
+          var date = a.getDate();
+          var hour = String(a.getHours()).padStart(2, '0');
+          var min = String(a.getMinutes()).padStart(2, '0');
+          var sec = String(a.getSeconds()).padStart(2, '0');
+          var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+          return time;
+        }
           
           function delay(ms) {
           return new Promise(resolve => setTimeout(resolve, ms));
@@ -201,9 +232,12 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
         )}
         {!loading && result.length > 0 ? (
           result.map((obj, index) => (
-            <section key={index}>
+            <section key={index} style={{ borderBottom: "2px solid #000" }}>
+              <h5>{obj.time}</h5>
+              {obj.dex !==null ? <p>Dex: {obj.dex}</p> : <></>}
               <p>Wallet: <a href={"https://solscan.io/account/" + obj.wallet + "#solTransfers"} target="_blank"> {obj.wallet}</a></p>
               <p>Amount: {obj.amount}</p>
+             
             </section>
           ))
         ) : (
