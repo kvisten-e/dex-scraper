@@ -182,7 +182,7 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
           var hour = String(a.getHours()).padStart(2, '0');
           var min = String(a.getMinutes()).padStart(2, '0');
           var sec = String(a.getSeconds()).padStart(2, '0');
-          var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+          var time = hour + ':' + min + ':' + sec + ' - ' + date + ' ' + month + ' ' + year;
           return time;
         }
           
