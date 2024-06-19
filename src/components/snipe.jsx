@@ -19,7 +19,8 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
   const [maxTransactionsInWallet, setMaxTransactionsInWallet] = useState(0)
   const [resultList, setResultList] = useState([])
   const [buttonClickCounter, setButtonClickCounter] = useState(0)
-
+  const [completedDexes, setCompletedDexes] = useState(0)
+  const [totalWalltes, setTotalWallets] = useState(0)
   useEffect(() => {
     if (triggerAction) {
       async function main() {
@@ -51,11 +52,13 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
         
         let signatureValue = [];
         if (typeof walletNew === 'object') {
+
+          setTotalWallets(walletNew.length)
           for (let wallet of walletNew) {
             const transactions = await getTransactions(wallet.address)
-            console.log("Fetched: ", wallet)
             const newSignatureValue = await getSignatureValue(wallet.address, transactions, minValueNew, maxValueNew, decimalerNew, wallet.name)
-            console.log("Transactions for : ", wallet)
+            let index = walletNew.indexOf(wallet) + 1
+            setCompletedDexes(index)
             signatureValue = signatureValue.concat(newSignatureValue)
           }  
 
@@ -227,6 +230,7 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
   return(
     <>
       <div className="found-tokens">
+        {allDexBool ? <p>Dexes loaded: {completedDexes} / {totalWalltes}</p> : <></>}
         {loading && (
           <div className="skeleton-loader">Loading...</div>
         )}
