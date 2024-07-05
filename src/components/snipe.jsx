@@ -3,7 +3,7 @@ import * as web3 from '@solana/web3.js';
 import { SystemProgram, SystemInstruction, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { GlobalContext } from './GlobalContext.jsx';
 
-export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, maxTransactionsInWalletProp, dexChoiceProp, triggerAction, allDex, allDexArr }) {
+export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, transactionsAmountProp, maxTransactionsInWalletProp, dexChoiceProp, triggerAction, allDex, allDexArr }) {
 
   const { params } = useContext(GlobalContext)
   const { signal } = useContext(GlobalContext)
@@ -13,6 +13,7 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
   const [minValue, setMinValue] = useState(0)
   const [maxValue, setMaxValue] = useState(0)
   const [decimaler, setDecimaler] = useState(0)
+  const [transactionsAmount, setTransactionsAmount] = useState(0)
   const [wallet, setWallet] = useState('')
   const [allDexBool, setAllDexBool] = useState()
   const [allDexArrFetch, setAllDexBoolFetch] = useState([])
@@ -21,16 +22,20 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
   const [buttonClickCounter, setButtonClickCounter] = useState(0)
   const [completedDexes, setCompletedDexes] = useState(0)
   const [totalWalltes, setTotalWallets] = useState(0)
+  
   useEffect(() => {
     if (triggerAction) {
       async function main() {
         setLoading(true); 
         if (!allDexBool) {
-          await snipare(minValue, maxValue, decimaler, wallet, maxTransactionsInWallet)          
+          await snipare(minValue, maxValue, decimaler, wallet, maxTransactionsInWallet, transactionsAmount)          
         } else {
-          await snipare(minValue, maxValue, decimaler, allDexArrFetch, maxTransactionsInWallet) 
+          await snipare(minValue, maxValue, decimaler, allDexArrFetch, maxTransactionsInWallet, transactionsAmount) 
         }
-        console.log("Result: ", resultList)
+
+        const formatedResult = removeDuplicates(resultList)
+
+        console.log("Result: ", formatedResult)
         
         resultList.sort((a, b) => {
           const dateA = new Date(a.time);
@@ -39,23 +44,26 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
         });   
         
         setLoading(false)
-        if (resultList) {
+        if (formatedResult) {
           setResultList([])
-          setResult(resultList)      
+          setResult(formatedResult)      
         }  
       }
       main()
 
-      async function snipare(minValueNew, maxValueNew, decimalerNew, walletNew, maxTransactionsInWalletNew ) {
+      async function snipare(minValueNew, maxValueNew, decimalerNew, walletNew, maxTransactionsInWalletNew, transactionsAmount ) {
 
         const rotateRPC = createRPCRotator();
         
+        const loops = parseInt(transactionsAmount) / 1000
+
         let signatureValue = [];
         if (typeof walletNew === 'object') {
 
           setTotalWallets(walletNew.length)
           for (let wallet of walletNew) {
-            const transactions = await getTransactions(wallet.address)
+            const transactions = await getTransactionsNew(wallet.address, loops)        
+
             const newSignatureValue = await getSignatureValue(wallet.address, transactions, minValueNew, maxValueNew, decimalerNew, wallet.name)
             let index = walletNew.indexOf(wallet) + 1
             setCompletedDexes(index)
@@ -63,8 +71,8 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
           }  
 
         } else {
-        const transactions = await getTransactions(wallet)
-        signatureValue = await getSignatureValue(walletNew, transactions, minValueNew, maxValueNew, decimalerNew, null)
+          const transactions = await getTransactionsNew(wallet, loops)
+          signatureValue = await getSignatureValue(walletNew, transactions, minValueNew, maxValueNew, decimalerNew, null)
         }
 
         console.log("signatureValue: ", signatureValue)          
@@ -83,8 +91,7 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
               resultList.push(eachWallet);
             }
           });
-        }
-
+        }   
 
         async function getWalletTransactions(wallet) {
           let attempts = 4
@@ -145,7 +152,35 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
           }
           return confirmedTransactionList;
           }
+        
+          async function getTransactionsNew(wallet, loops) {
 
+            let signatures = []
+            let lastSignature = ''
+            let response;
+            for (let i = 0; i < loops; i++){
+              if (i > 0) {
+
+                response = await rotateRPC().getConfirmedSignaturesForAddress2(getPublickey(wallet), { before: lastSignature });
+              } else {
+                response = await rotateRPC().getConfirmedSignaturesForAddress2(getPublickey(wallet));
+              }
+
+              if (response && response.length > 0) {
+                signatures = signatures.concat(response);
+                console.log(signatures)
+                console.log(response[response.length - 1])
+                lastSignature = response[response.length - 1].signature;
+
+              } else {
+                console.log("No transactions found in loop: ", i);
+              }    
+            }
+            console.log("signatures amount:", signatures.length)
+            signatures = signatures.map(signature => signature.signature);
+            return signatures
+          }        
+        
           async function getTransactions(wallet) {
               let listTransactions = []
 
@@ -210,16 +245,29 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
 
       }
 
+      function removeDuplicates(array) {
+        const uniqueObjects = new Set();
+        return array.filter(item => {
+          const serializedItem = JSON.stringify(item);
+          if (!uniqueObjects.has(serializedItem)) {
+            uniqueObjects.add(serializedItem);
+            return true;
+          }
+          return false;
+        });
+      }     
+
     }
   }, [buttonClickCounter]);
 
 
   useEffect(() => {
     
-    console.log({ 'minValue': minValueProp, 'maxValue': maxValueProp, 'decimaler': decimalerProp, 'maxTransactionsInWallet': maxTransactionsInWalletProp, 'dexChoiceProp': dexChoiceProp, "triggerAction": triggerAction, "allDex": allDex, "allDexArr": allDexArr})
+    console.log({ 'minValue': minValueProp, 'maxValue': maxValueProp, 'decimaler': decimalerProp, 'transactionsAmount': transactionsAmountProp, 'maxTransactionsInWallet': maxTransactionsInWalletProp, 'dexChoiceProp': dexChoiceProp, "triggerAction": triggerAction, "allDex": allDex, "allDexArr": allDexArr})
     setMinValue(minValueProp)
     setMaxValue(maxValueProp)
     setDecimaler(decimalerProp)
+    setTransactionsAmount(transactionsAmountProp)
     setWallet(dexChoiceProp)
     setMaxTransactionsInWallet(maxTransactionsInWalletProp)
     setAllDexBool(allDex)

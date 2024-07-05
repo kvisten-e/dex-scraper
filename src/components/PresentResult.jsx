@@ -63,7 +63,6 @@ export default function PresentResult(props) {
                   return new web3.Connection(RPCs[0], 'confirmed');
                 }
               }
-
               const rotateRPC = createRPCRotator();
               const jsonString = await fetchMainWalletTransactions()
 

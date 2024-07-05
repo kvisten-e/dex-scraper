@@ -10,6 +10,8 @@ export default function snipeCreator() {
   const [minValue, setMinValue] = useState(() => localStorage.getItem('minValue') || '60')
   const [maxValue, setMaxValue] = useState(() => localStorage.getItem('maxValue') || '80')
   const [decimaler, setDecimaler] = useState(() => localStorage.getItem('decimaler') || '50')
+  const [inputWallet, setInputWallet] = useState('')
+  const [transactionsAmount, settransactionsAmount] = useState(() => localStorage.getItem('transactionsAmount') || '1000')
   const [maxTransactionsInWallet, setMaxTransactionsInWallet] = useState(() => localStorage.getItem('maxTransactionsInWallet') || '10')
   const [dexChoice, setDexChoice] = useState('5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9');
   const [csvData, setCsvData] = useState([])
@@ -17,6 +19,8 @@ export default function snipeCreator() {
   const[allDex, setAllDex] = useState(false)
 
   const [triggerCount, setTriggerCount] = useState(0);
+
+  const amounts = [1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,20000,30000,40000,50000,60000,70000,80000,90000,100000]
 
   useEffect(() => {
     
@@ -41,8 +45,9 @@ export default function snipeCreator() {
     localStorage.setItem('minValue', minValue);
     localStorage.setItem('maxValue', maxValue);
     localStorage.setItem('decimaler', decimaler);
+    localStorage.setItem('transactionsAmount', transactionsAmount);
     localStorage.setItem('maxTransactionsInWallet', maxTransactionsInWallet);
-  }, [minValue, maxValue, decimaler, maxTransactionsInWallet])
+  }, [minValue, maxValue, decimaler, transactionsAmount, maxTransactionsInWallet])
 
   const changeMinValue = (e) => {
     setMinValue(Number(e.target.value));
@@ -65,9 +70,47 @@ export default function snipeCreator() {
   }
 
 
+  const checkAddress = (valueButton) => {
+    const base58Chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    let wallet = valueButton
+
+    const walletLength = 44
+    if (wallet.length !== walletLength) {
+      return true;
+    }
+    for (let i = 0; i < wallet.length; i++) {
+      if (!base58Chars.includes(wallet[i])) {
+        return true;
+      }
+    }
+    return false
+  }  
+
+  const handleChangeAmount = (e) => {
+    const trimmedValue = e.target.value.trim();
+    settransactionsAmount(trimmedValue);
+  }  
+
   const handleSnipeTrigger = () => {
-    setAllDex(false)
-    setTriggerCount(prev => prev + 1); 
+    if (inputWallet === '') {
+      setAllDex(false)
+      setTriggerCount(prev => prev + 1);  
+      return  
+    } else {
+      if (!checkAddress(inputWallet)) {
+        console.log("Confirmed wallet")
+        console.log("inputWallet: ", inputWallet)
+        setDexChoice(inputWallet)
+        setAllDex(false)
+        setTriggerCount(prev => prev + 1);         
+      } else {
+        console.log("Wrong wallet")
+      }      
+    }
+
+
+    
+
   } 
   const handleSnipeTriggerAll = () => {  
     setAllDex(true)  
@@ -101,15 +144,31 @@ export default function snipeCreator() {
               {csvData.map((option, index) => (
                 <option key={index} value={option.address}>{option.name}</option>
               ))}
-            </select>
-          </div>           
-          <button onClick={handleSnipeTrigger}>Search for wallets</button>
-          <button onClick={handleSnipeTriggerAll}>Search for wallet on all</button>
+            </select>         
+          </div>  
+          <div>
+            <input type="search" id="walletAddy" value={inputWallet} placeholder="Input a wallet address" onChange={(e) => setInputWallet(e.target.value)} />
+          </div>          
+          <div>
+            <h4>Select total transactions</h4>
+            <select value={transactionsAmount} onChange={handleChangeAmount}>
+              {amounts.map((amount, index) => (
+                <option key={index} value={amount}>{amount}</option>
+              ))}
+            </select>         
+          </div>
+          <div>
+            <button onClick={handleSnipeTrigger}>Search for wallets</button>
+            <button onClick={handleSnipeTriggerAll}>Search for wallet on all</button>
+          </div>
+
         </div>
         <div id="seconds-pump">
-          <Snipe minValueProp={minValue} maxValueProp={maxValue} decimalerProp={decimaler} maxTransactionsInWalletProp={maxTransactionsInWallet} dexChoiceProp={dexChoice} triggerAction={triggerCount} allDex={allDex} allDexArr={csvData} />
+          <Snipe minValueProp={minValue} maxValueProp={maxValue} decimalerProp={decimaler} transactionsAmountProp={transactionsAmount} maxTransactionsInWalletProp={maxTransactionsInWallet} dexChoiceProp={dexChoice} triggerAction={triggerCount} allDex={allDex} allDexArr={csvData} />
         </div>
       </div>
     </>
   );
 }
+
+

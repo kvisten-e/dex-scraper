@@ -1,0 +1,51 @@
+{
+  "session": {
+    "status": 1,
+    "token": {
+      "ca:": "6k3fjxxNQh1dKZzpNQK3dNFrCErDkHzGjMWYyrdzpump",
+      "name": "MaveFlick",
+      "symbol": "Mave",
+      "supply": 1000000000000000,
+      "imageUrl": "https://cf-ipfs.com/ipfs/QmS6j1jeuLugzx1PPcFuPtz3h5e79MTRJjMWddv3UxPQsH",
+      "bondingCurve": "5hPPJzQGyqKCKS4EwUtN4JmHXwm874LFWHU24gPqK12c"
+    },
+    "farm": {
+      "totalTokenAmount:": 1424014147194,
+      "totalSolAmount": 534221734,
+      "totalWalletsFarm": 6,
+      "wallets": [
+        {
+          "address": "8CtoWqgipje1Faik1tjyBwiE5vqp6L3DUvtzAsez8gBU",
+          "sol": 74707845,
+          "tokenAmount": 712480639991
+        },
+        {
+          "address": "4oz9ipyK1ihLncsdVKCbkJ5LCyJ7LwJTyjKeYC1WKV4U",
+          "sol": 59513889,
+          "tokenAmount": 711533507203
+        },
+        {
+          "address": "7uJn9UFdx6JkK6PtWGFVDSvYcjf5jQT7xKzY2nmDYzvn",
+          "sol": 100000000,
+          "tokenAmount": 0
+        },
+        {
+          "address": "477mnLX2PTBftTzM2FtUvh5nxbEfp9oyYjNQLmNH3TW7",
+          "sol": 100000000,
+          "tokenAmount": 0
+        },
+        {
+          "address": "GmZ98Lt1Hu1dLz6jKrfkstJP8J4qVuSgf4CFN284Vx2P",
+          "sol": 100000000,
+          "tokenAmount": 0
+        },
+        {
+          "address": "9tFEzeckXZaKWMWVkAv72iYJkUqX69wybUmsqBdY1sg1",
+          "sol": 100000000,
+          "tokenAmount": 0
+        }
+      ],
+      "newWallets": []
+    }
+  }
+}

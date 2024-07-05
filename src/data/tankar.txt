@@ -1,0 +1,9 @@
+Köp/Sälj Raydium:
+om "type": "SWAP", "source": "RAYDIUM", köp/sälj på Raydium
+
+Köp/Sälj Pumpfun:
+Skilj köp/sälj från transfer transaktioner genom "source": SYSTEM_PROGRAM = köp/sälj, annat = transfers
+Transfers av sol har inte key "mint" i "nativeTransfers"
+
+
+blob:https://pump.fun/e89e4983-5b0a-497a-906f-f960e3f3a1a2

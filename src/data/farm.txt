@@ -1,0 +1,14 @@
+Token skapare: EV8MdDWLhPp24ppec3uw2aXgV3XdBYXSaF849S2tAyxC
+Token: 6k3fjxxNQh1dKZzpNQK3dNFrCErDkHzGjMWYyrdzpump
+
+
+Main: GKa1T3TNLoa4wXyYd6UK1iSdX8NZKrZwKJGccHeuFe6S = 1 sol
+Varje wallet = 0.1
+{
+  8CtoWqgipje1Faik1tjyBwiE5vqp6L3DUvtzAsez8gBU
+  4oz9ipyK1ihLncsdVKCbkJ5LCyJ7LwJTyjKeYC1WKV4U
+  7uJn9UFdx6JkK6PtWGFVDSvYcjf5jQT7xKzY2nmDYzvn
+  477mnLX2PTBftTzM2FtUvh5nxbEfp9oyYjNQLmNH3TW7
+  GmZ98Lt1Hu1dLz6jKrfkstJP8J4qVuSgf4CFN284Vx2P
+  9tFEzeckXZaKWMWVkAv72iYJkUqX69wybUmsqBdY1sg1
+}
