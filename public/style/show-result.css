@@ -151,3 +151,18 @@
     }
   }
 }
+
+.show-process-bars-side {
+  width: 70vw;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+
+  .key {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+}

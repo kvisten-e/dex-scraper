@@ -22,10 +22,18 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
   const [buttonClickCounter, setButtonClickCounter] = useState(0)
   const [completedDexes, setCompletedDexes] = useState(0)
   const [totalWalltes, setTotalWallets] = useState(0)
-  
+  const { processSnipe, setProcessSnipe } = useContext(GlobalContext) 
+  const [processStepOne, setProcessStepOne] = useState(1)
+  const [signatureAmount, setSignatureAmount] = useState(0)
+
   useEffect(() => {
     if (triggerAction) {
       async function main() {
+        setSignatureAmount(0)
+        setProcessSnipe([
+          { step: "1. Get transactions from wallet/dex", completed: 0 },
+          { step: "2. Find eligible transactions", completed: 0 },
+        ])        
         setLoading(true); 
         if (!allDexBool) {
           await snipare(minValue, maxValue, decimaler, wallet, maxTransactionsInWallet, transactionsAmount)          
@@ -56,7 +64,6 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
         const rotateRPC = createRPCRotator();
         
         const loops = parseInt(transactionsAmount) / 1000
-
         let signatureValue = [];
         if (typeof walletNew === 'object') {
 
@@ -71,13 +78,18 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
           }  
 
         } else {
+          console.log("Här1: ")
           const transactions = await getTransactionsNew(wallet, loops)
+          console.log("Här2: ", transactions)
+
           signatureValue = await getSignatureValue(walletNew, transactions, minValueNew, maxValueNew, decimalerNew, null)
         }
 
-        console.log("signatureValue: ", signatureValue)          
+        console.log("signatureValue: ", signatureValue)  
+        
         if (signatureValue.length > 0) {
-          const promises = signatureValue.map(async (eachWallet) => {
+          setSignatureAmount(signatureValue.length)
+          const promises = signatureValue.map(async (eachWallet, i) => {
             const result = await getWalletTransactions(eachWallet.wallet);
             if (result.length <= maxTransactionsInWalletNew) {
               return eachWallet;
@@ -91,14 +103,15 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
               resultList.push(eachWallet);
             }
           });
-        }   
+        } 
 
         async function getWalletTransactions(wallet) {
           let attempts = 4
           while (attempts > 0) {
             try {
               const signatures = await rotateRPC().getSignaturesForAddress(getPublickey(wallet), { commitment: "finalized" });
-            if (signatures) {
+              if (signatures) {
+              setProcessStepOne(prevProcessStepOne => prevProcessStepOne + 1);
               return signatures
             }
               return []                
@@ -158,8 +171,8 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
             let signatures = []
             let lastSignature = ''
             let response;
-            for (let i = 0; i < loops; i++){
-              if (i > 0) {
+            for (let i = 1; i <= loops; i++){
+              if (i > 1) {
 
                 response = await rotateRPC().getConfirmedSignaturesForAddress2(getPublickey(wallet), { before: lastSignature });
               } else {
@@ -174,7 +187,13 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
 
               } else {
                 console.log("No transactions found in loop: ", i);
-              }    
+              } 
+              let statusCompleted = (i / loops) * 100;
+              setProcessSnipe(prevProcess => prevProcess.map((step, idx) => ({
+                ...step,
+                completed: idx === 0 ? statusCompleted : step.completed
+              })));              
+
             }
             console.log("signatures amount:", signatures.length)
             signatures = signatures.map(signature => signature.signature);
@@ -260,6 +279,14 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
     }
   }, [buttonClickCounter]);
 
+  useEffect(() => {
+    console.log(processStepOne , "/", signatureAmount)
+    let statusCompleted = (processStepOne / signatureAmount) * 100; // Note: i+1 to reflect the current step
+    setProcessSnipe(prevProcess => prevProcess.map((step, idx) => ({
+      ...step,
+      completed: idx === 1 ? statusCompleted : step.completed
+    })));    
+  },[processStepOne])
 
   useEffect(() => {
     

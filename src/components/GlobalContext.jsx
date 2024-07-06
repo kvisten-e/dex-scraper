@@ -4,6 +4,7 @@ const GlobalContext = createContext()
 
 function GlobalProvider({children}) {
   const [process, setProcess] = useState([])
+  const [processSnipe, setProcessSnipe] = useState([])
   const [wallet, setWallet] = useState([])
   const [params, setParams] = useState({})
   const [signal, setSignal] = useState({})
@@ -14,6 +15,8 @@ function GlobalProvider({children}) {
     value={{
       process,
       setProcess,
+      processSnipe,
+      setProcessSnipe,
       wallet,
       setWallet,
       params,

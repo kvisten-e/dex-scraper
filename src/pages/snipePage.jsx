@@ -4,6 +4,7 @@ import { GlobalContext } from '../components/GlobalContext.jsx';
 import Snipe from '../components/snipe.jsx'
 import { csvParse } from 'd3-dsv';
 import { SavedContext } from "../components/SavedWalletContext.jsx";
+import ProgressBar from 'react-bootstrap/ProgressBar';
 
 export default function snipeCreator() {
   
@@ -16,13 +17,20 @@ export default function snipeCreator() {
   const [dexChoice, setDexChoice] = useState('5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9');
   const [csvData, setCsvData] = useState([])
   const { savedWallets, defaultWallets } = useContext(SavedContext)
-  const[allDex, setAllDex] = useState(false)
+  const [allDex, setAllDex] = useState(false)
+  const { processSnipe, setProcessSnipe } = useContext(GlobalContext)
+  
 
   const [triggerCount, setTriggerCount] = useState(0);
 
   const amounts = [1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,20000,30000,40000,50000,60000,70000,80000,90000,100000]
 
   useEffect(() => {
+
+    setProcessSnipe([
+      { step: "1. Get transactions from wallet/dex", completed: 0 },
+      { step: "2. Find eligible transactions", completed: 0 },
+    ])
     
     fetch('./src/assets/dex.csv')
       .then(response => response.text())
@@ -31,11 +39,9 @@ export default function snipeCreator() {
           name: d.dex.trim(),
           address: d.address.trim()
         }));
-        console.log(savedWallets)
         if (savedWallets.length > 0) {
           parsedData = parsedData.concat(savedWallets)          
         }
-        console.log("parsedData: ", parsedData)
         setCsvData(parsedData);
       })
       .catch(error => console.error('Error reading the CSV file:', error));
@@ -161,7 +167,14 @@ export default function snipeCreator() {
             <button onClick={handleSnipeTrigger}>Search for wallets</button>
             <button onClick={handleSnipeTriggerAll}>Search for wallet on all</button>
           </div>
-
+          <div className='show-process-bars'>
+            {processSnipe.map((key, index) => (
+              <div key={index} className='key'>
+                <p>{key.step}</p>
+                <ProgressBar animated now={key.completed} max={100} variant='success' />
+              </div>
+            ))}
+          </div>
         </div>
         <div id="seconds-pump">
           <Snipe minValueProp={minValue} maxValueProp={maxValue} decimalerProp={decimaler} transactionsAmountProp={transactionsAmount} maxTransactionsInWalletProp={maxTransactionsInWallet} dexChoiceProp={dexChoice} triggerAction={triggerCount} allDex={allDex} allDexArr={csvData} />
