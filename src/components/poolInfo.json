@@ -1,0 +1,93 @@
+
+{
+  "id": "329b0ff3-80aa-43be-95f8-ffc870b7a1ed",
+  "success": true,
+  "data": [
+    {
+      "type": "Standard",
+      "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+      "id": "3nGTYzdhNN7ewXYCjX7rHFFLXNCSSMbwVxhVHTXhVYNt",
+      "mintA": {
+        "chainId": 101,
+        "address": "7bC1KrVjgkBXFHQ4UShh3k5zUTSk5a6d3y73YwCtpump",
+        "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "logoURI": "https://img-v1.raydium.io/icon/7bC1KrVjgkBXFHQ4UShh3k5zUTSk5a6d3y73YwCtpump.png",
+        "symbol": "Rizzi",
+        "name": "Rizzi",
+        "decimals": 6,
+        "tags": [
+          "hasFreeze"
+        ],
+        "extensions": {}
+      },
+      "mintB": {
+        "chainId": 101,
+        "address": "So11111111111111111111111111111111111111112",
+        "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "logoURI": "https://img-v1.raydium.io/icon/So11111111111111111111111111111111111111112.png",
+        "symbol": "WSOL",
+        "name": "Wrapped SOL",
+        "decimals": 9,
+        "tags": [],
+        "extensions": {}
+      },
+      "price": 3.022806706703474e-14,
+      "mintAmountA": 310510757409.1652,
+      "mintAmountB": 0.00938614,
+      "feeRate": 0.0025,
+      "openTime": "1720251832",
+      "tvl": 2.62,
+      "day": {
+        "volume": 755627.747305359,
+        "volumeQuote": 6409.834827848571,
+        "volumeFee": 1889.0693682634,
+        "apr": 26315831.71,
+        "feeApr": 26315831.71,
+        "priceMin": 3.896841371230698e-17,
+        "priceMax": 0.000013386031564128835,
+        "rewardApr": []
+      },
+      "week": {
+        "volume": 1296312.518702639,
+        "volumeQuote": 10996.353865646011,
+        "volumeFee": 3240.781296756603,
+        "apr": 3710627.07,
+        "feeApr": 3710627.07,
+        "priceMin": 3.896841371230698e-17,
+        "priceMax": 0.000013386031564128835,
+        "rewardApr": []
+      },
+      "month": {
+        "volume": 1296312.518702639,
+        "volumeQuote": 10996.353865646011,
+        "volumeFee": 3240.781296756603,
+        "apr": 1484250.83,
+        "feeApr": 1484250.83,
+        "priceMin": 3.896841371230698e-17,
+        "priceMax": 0.000013386031564128835,
+        "rewardApr": []
+      },
+      "pooltype": [
+        "OpenBookMarket"
+      ],
+      "rewardDefaultInfos": [],
+      "farmUpcomingCount": 0,
+      "farmOngoingCount": 0,
+      "farmFinishedCount": 0,
+      "marketId": "3m7CeuL3my8D4jaijW14j7YXeFnAg6nHUjU53uYT7e5B",
+      "lpMint": {
+        "chainId": 101,
+        "address": "5isyQyeXR4KRy9vWCnXZLVPf68cVQ86M88bcGYpWoEVp",
+        "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "logoURI": "",
+        "symbol": "",
+        "name": "",
+        "decimals": 6,
+        "tags": [],
+        "extensions": {}
+      },
+      "lpPrice": 0.000001766494662181736,
+      "lpAmount": 1483239.697419
+    }
+  ]
+}

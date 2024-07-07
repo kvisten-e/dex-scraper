@@ -1,0 +1,74 @@
+[
+  {
+    "account": "B5KscWYwRi3p7H6nqcfN9ZgcWKE5fTupKUhAAzfgu71z",
+    "onChainAccountInfo": {
+      "accountInfo": {
+        "key": "B5KscWYwRi3p7H6nqcfN9ZgcWKE5fTupKUhAAzfgu71z",
+        "isSigner": false,
+        "isWritable": false,
+        "lamports": 1461600,
+        "data": {
+          "parsed": {
+            "info": {
+              "decimals": 9,
+              "freezeAuthority": "",
+              "isInitialized": true,
+              "mintAuthority": "",
+              "supply": "3599991462051155298"
+            },
+            "type": "mint"
+          },
+          "program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "space": 82
+        },
+        "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "executable": false,
+        "rentEpoch": 18446744073709552000
+      },
+      "error": ""
+    },
+    "onChainMetadata": {
+      "metadata": {
+        "tokenStandard": "Fungible",
+        "key": "MetadataV1",
+        "updateAuthority": "7deXNvyyVqGd9v4GnoBPA5iy79kiSsTfh7vieAVjvWuc",
+        "mint": "B5KscWYwRi3p7H6nqcfN9ZgcWKE5fTupKUhAAzfgu71z",
+        "data": {
+          "name": "Kendall",
+          "symbol": "KENDALL",
+          "uri": "https://arweave.net/ZKoARHEsZ5RWw0lkHQ2LRxuR8GvSCv7eC1thDi3ma8o",
+          "sellerFeeBasisPoints": 0,
+          "creators": [
+            {
+              "address": "7deXNvyyVqGd9v4GnoBPA5iy79kiSsTfh7vieAVjvWuc",
+              "verified": true,
+              "share": 100
+            }
+          ]
+        },
+        "primarySaleHappened": false,
+        "isMutable": true,
+        "editionNonce": 254,
+        "uses": {
+          "useMethod": "",
+          "remaining": 0,
+          "total": 0
+        },
+        "collection": null,
+        "collectionDetails": null
+      },
+      "error": ""
+    },
+    "offChainMetadata": {
+      "metadata": {
+        "description": "Kendall",
+        "image": "https://arweave.net/64Q54Yvouo56H3sYT5hnyHiaZCnWVLZLBvtqVUw3Q0Y",
+        "name": "Kendall",
+        "symbol": "KENDALL"
+      },
+      "uri": "https://arweave.net/ZKoARHEsZ5RWw0lkHQ2LRxuR8GvSCv7eC1thDi3ma8o",
+      "error": ""
+    },
+    "legacyMetadata": null
+  }
+]

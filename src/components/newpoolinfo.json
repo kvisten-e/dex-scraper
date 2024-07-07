@@ -1,0 +1,88 @@
+{
+  "id": "36ed7f3b-36d9-4ed5-b478-cb1e49187450",
+  "success": true,
+  "data": [
+    {
+      "type": "Standard",
+      "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+      "id": "85Y9JHqWeMNUkA31KoyRf38ndP7xunMJaGPfvhKntpuD",
+      "mintA": {
+        "chainId": 101,
+        "address": "4ChgnAvFn7jsF9Dh4G81fhcCz1FH1G8oQM9KwRuZACnr",
+        "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "logoURI": "https://img-v1.raydium.io/icon/4ChgnAvFn7jsF9Dh4G81fhcCz1FH1G8oQM9KwRuZACnr.png",
+        "symbol": "ASTRO",
+        "name": "Astrology Dog",
+        "decimals": 9,
+        "tags": [],
+        "extensions": {}
+      },
+      "mintB": {
+        "chainId": 101,
+        "address": "So11111111111111111111111111111111111111112",
+        "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "logoURI": "https://img-v1.raydium.io/icon/So11111111111111111111111111111111111111112.png",
+        "symbol": "WSOL",
+        "name": "Wrapped SOL",
+        "decimals": 9,
+        "tags": [],
+        "extensions": {}
+      },
+      "price": 9.530647856658219e-9,
+      "mintAmountA": 735129971.2647913,
+      "mintAmountB": 7.006264885,
+      "feeRate": 0.0025,
+      "openTime": "1720291515",
+      "tvl": 1957.8,
+      "day": {
+        "volume": 38461.64169855016,
+        "volumeQuote": 340.46343568598843,
+        "volumeFee": 96.1541042463753,
+        "apr": 1792.64,
+        "feeApr": 1792.64,
+        "priceMin": 5.297401398232424e-9,
+        "priceMax": 1.1333166914670357e-7,
+        "rewardApr": []
+      },
+      "week": {
+        "volume": 64494.66702891848,
+        "volumeQuote": 571.0317852690004,
+        "volumeFee": 161.236667572296,
+        "apr": 247.07,
+        "feeApr": 247.07,
+        "priceMin": 5.297401398232424e-9,
+        "priceMax": 1.1333166914670357e-7,
+        "rewardApr": []
+      },
+      "month": {
+        "volume": 64494.66702891848,
+        "volumeQuote": 571.0317852690004,
+        "volumeFee": 161.236667572296,
+        "apr": 98.83,
+        "feeApr": 98.83,
+        "priceMin": 5.297401398232424e-9,
+        "priceMax": 1.1333166914670357e-7,
+        "rewardApr": []
+      },
+      "pooltype": ["OpenBookMarket"],
+      "rewardDefaultInfos": [],
+      "farmUpcomingCount": 0,
+      "farmOngoingCount": 0,
+      "farmFinishedCount": 0,
+      "marketId": "7k8VJdc43Re83S76uGqnhRB58SbkyW5ws4B4FtoBAb5F",
+      "lpMint": {
+        "chainId": 101,
+        "address": "GiqFBVNRpnCBMVHjZ1J7XLsvgdMqomQbv5BH6Qzx9h1P",
+        "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "logoURI": "",
+        "symbol": "",
+        "name": "",
+        "decimals": 9,
+        "tags": [],
+        "extensions": {}
+      },
+      "lpPrice": 0.028406692917288794,
+      "lpAmount": 68920.243760451
+    }
+  ]
+}

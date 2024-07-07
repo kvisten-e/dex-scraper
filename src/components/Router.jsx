@@ -10,6 +10,7 @@ import ShowDexes from "../pages/show-dexes.jsx"
 import Pump from "../pages/pumpPage.jsx"
 import Snipe from "../pages/snipePage.jsx"
 import AudioButton from "./playbutton.jsx";
+import FindTokens from "../pages/findTokens.jsx"
 
 
 function Router() {
@@ -25,6 +26,7 @@ function Router() {
             <Route path="/saved-wallets" element={<SavedWallets />} />
             <Route path="/pump" element={<Pump />} />
             <Route path="/snipe" element={<Snipe />} />
+            <Route path="/find-tokens" element={<FindTokens/>}/>
             <Route exact path="/address/:address" element={<ShowWallet />} />
             <Route exact path="/all-dexes" element={<ShowDexes />} />
             <Route path="*" element={<Nomatch/>}/>
