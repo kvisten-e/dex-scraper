@@ -156,7 +156,7 @@ const parseLpMintTransaction = async (txs) => {
 const fetchPoolInfo = async (lpmint) => {
   const response = await fetch("https://api-v3.raydium.io/pools/info/lps?lps=" + lpmint)
   const data = await response.json()
-  console.log("Pool information: ", data.data[0].month.priceMax * 9999122396599);
+  console.log("Pool information: ", data);
   fs.writeFile('poolInfo.json', JSON.stringify(data, null, 2), (err) => {
     if (err) {
       console.error('Error writing to file', err);
@@ -165,7 +165,7 @@ const fetchPoolInfo = async (lpmint) => {
     }
   });  
 }
-// fetchPoolInfo("5isyQyeXR4KRy9vWCnXZLVPf68cVQ86M88bcGYpWoEVp")
+fetchPoolInfo("65pwo8gJU9CHV59FbGZBf7Zcr5MUcTNmBedHGL54jivP")
 
 const fetchPoolInfoNew = async (marketId) => {
   const response = await fetch("https://api.geckoterminal.com/api/v2/networks/solana/pools/" + marketId)
@@ -238,9 +238,6 @@ async function getHistoricData(token) {
   return tokenValueData;
 }
 
-const data = await getHistoricData('AVWsE5PJv3oZPzmurvD6cSwvS1x7bPhj1nFz2LMHFxoK')
-console.log("Data: ", data)
+/* const data = await getHistoricData('AVWsE5PJv3oZPzmurvD6cSwvS1x7bPhj1nFz2LMHFxoK')
+console.log("Data: ", data) */
 
-999800234
-
-0.0001352229134615297
