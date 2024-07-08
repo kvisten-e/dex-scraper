@@ -165,7 +165,7 @@ const fetchPoolInfo = async (lpmint) => {
     }
   });  
 }
-fetchPoolInfo("65pwo8gJU9CHV59FbGZBf7Zcr5MUcTNmBedHGL54jivP")
+// fetchPoolInfo("65pwo8gJU9CHV59FbGZBf7Zcr5MUcTNmBedHGL54jivP")
 
 const fetchPoolInfoNew = async (marketId) => {
   const response = await fetch("https://api.geckoterminal.com/api/v2/networks/solana/pools/" + marketId)
@@ -225,9 +225,12 @@ async function getHistoricData(token) {
   let data;
 
   try {
-    const response = await fetch(`https://public-api.birdeye.so/defi/history_price?address=${token}&address_type=token&type=1H&time_from=1000000000&time_to=1720381217`, options);
+    const response = await fetch(`https://public-api.birdeye.so/defi/history_price?address=${token}&address_type=token&type=15m&time_from=1000000000&time_to=1720381217`, options);
     const jsonResponse = await response.json();
     data = jsonResponse.data.items;
+    if (data.length < 1) {
+      return data
+    }
     const highestValueObject = data.reduce((max, obj) => obj.value > max.value ? obj : max, data[0]);
     tokenValueData.currentValue = data[data.length - 1].value
     tokenValueData.maxValue = highestValueObject.value
@@ -238,6 +241,116 @@ async function getHistoricData(token) {
   return tokenValueData;
 }
 
-/* const data = await getHistoricData('AVWsE5PJv3oZPzmurvD6cSwvS1x7bPhj1nFz2LMHFxoK')
+// const data = await getHistoricData('AcQ2iUi8oYRymU2dPemVpxxA7ytcjg4Qfn4BRTaaKh9C')
+// console.log("Data: ", data)
+
+
+
+const getCreatePoolData = async (lpMint) => {
+  const url = `https://api.helius.xyz/v0/addresses/${lpMint}/transactions?api-key=214a5e1f-bfc9-4e59-a1ce-f96533457125&type=CREATE_POOL`
+  const response = await fetch(url);
+  const data = await response.json();
+  if (data.length >= 1) {
+    return {
+      status: true,
+      lpTokenAmount: data[data.length - 1].tokenTransfers[data[data.length - 1].tokenTransfers.length - 1].tokenAmount
+    }
+  } else {
+    return {
+      status: false
+    }    
+  } 
+};
+
+/* const data = await getCreatePoolData('8XUuHH6514bF9jUtafa5vRHZ8u22G27i3TqCDo84jP5u');
 console.log("Data: ", data) */
 
+const findBurnTransaction = async (lpMint) => {
+  const url = `https://api.helius.xyz/v0/addresses/${lpMint}/transactions?api-key=214a5e1f-bfc9-4e59-a1ce-f96533457125&type=BURN`
+  const response = await fetch(url);
+  const data = await response.json();
+  if (data.length >= 1) {
+    return {
+      status: true,
+      burnedLpTokenAmount: data[data.length - 1].tokenTransfers[0].tokenAmount
+    }
+  } else {
+    return {
+      status: false
+    }
+  }   
+
+};
+
+/* const data = await findBurnTransaction('8XUuHH6514bF9jUtafa5vRHZ8u22G27i3TqCDo84jP5u');
+console.log("Data: ", data) */
+
+
+import * as web3 from "@solana/web3.js";
+function getPublickey(wallet) {
+  const publicKeyGet = new web3.PublicKey(wallet);
+  return publicKeyGet;
+}
+
+
+
+const connection = new web3.Connection("https://mainnet.helius-rpc.com/?api-key=048c7f8e-9afc-4608-b1c3-0bf54990561f", "confirmed")
+
+/* const getTokenTransactions = async (address) => {
+  const response = await connection.getConfirmedSignaturesForAddress2(
+    getPublickey(address)
+  );
+  console.log("Response: ", response.length)
+};
+
+
+getTokenTransactions("3Mq8VsFmaTmoqqurfh17TWWwhcpcW4LZWGN45tD6yk2J") */
+
+async function getTransactionsNew(wallet) {
+
+  let signatures = []
+  let lastSignature = ''
+  let response;
+  let loops = 1
+  console.log("Startar: ")
+  for (let i = 1; i <= loops; i++) {
+    console.log("Loop: ", i)
+    if (i > 1) {
+      response = await connection.getConfirmedSignaturesForAddress2(getPublickey(wallet), { before: lastSignature });
+    } else {
+      response = await connection.getConfirmedSignaturesForAddress2(getPublickey(wallet));
+    }
+
+    if (response && response.length > 0) {
+      signatures = signatures.concat(response);
+      lastSignature = response[response.length - 1].signature
+    } else {
+      console.log("No transactions found in loop: ", i);
+    }
+    console.log("signatures amount:", signatures.length)
+
+    if (signatures.length >= 1000 * loops) {
+      loops = loops + 1
+      console.log("Ökar loops: ", loops)
+      console.log("Last sign: ", lastSignature)
+    }
+
+  }
+
+
+/*   signatures = signatures.map(signature => signature.signature);
+  return signatures */
+} 
+
+// getTransactionsNew("3Mq8VsFmaTmoqqurfh17TWWwhcpcW4LZWGN45tD6yk2J")
+
+
+"8XUuHH6514bF9jUtafa5vRHZ8u22G27i3TqCDo84jP5u"
+
+async function getTokenSupply(token) {
+  const response = await connection.getTokenSupply(getPublickey(token));
+  return parseInt(response.value.uiAmountString);
+}
+
+const tokens = await getTokenSupply("8XUuHH6514bF9jUtafa5vRHZ8u22G27i3TqCDo84jP5u")
+console.log("Tokens: ", tokens)

@@ -65,10 +65,12 @@ export default function Tokens({ days, minStartlp, minTotalMc, minCurrentMc, tri
         );
 
         const result = [];
-        fetchTokens = fetchTokens.slice(0, 150);
+        fetchTokens = fetchTokens.slice(0, 50);
 
-        for (let eachToken of fetchTokens) {
+        for (let i = 0; i < fetchTokens.length; i++) {
+          let eachToken = fetchTokens[i];
           // console.log("eachtoken: ", eachToken)
+
           let attempts = 4;
           let tokenObject = {
             baseMint: "Not fetched",
@@ -85,6 +87,7 @@ export default function Tokens({ days, minStartlp, minTotalMc, minCurrentMc, tri
             isFreezeable: false,
             mintAuthorityOn: false,
             lpBurned: false,
+            lpPoolBurned: -1,
             currentMc: -1,
             currentValue: -1,
             maxMc: -1,
@@ -117,46 +120,63 @@ export default function Tokens({ days, minStartlp, minTotalMc, minCurrentMc, tri
                 tokendata.onChainAccountInfo.accountInfo.data.parsed.info.freezeAuthority;
               tokenObject.mintAuthorityOn =
                 tokendata.onChainAccountInfo.accountInfo.data.parsed.info.mintAuthority;
+              tokenObject.imageUrl =
+                tokendata.onChainMetadata.metadata.data.uri;
 
-              const transactions = await getTokenTransactions(eachToken.lpMint);
-              const txs = transactions.map((tx) => tx.signature);
-              const lpStatus = await parseLpMintTransaction(txs);
-              if (lpStatus.length > 1) {
-                if (lpStatus[lpStatus.length - 2].type === "BURN") {
-                  tokenObject.lpBurned = true;
-                } else if (
-                  lpStatus[lpStatus.length - 2].type === "WITHDRAW_LIQUIDITY"
+
+              const createPoolData = await getCreatePoolData(eachToken.lpMint);
+              if (createPoolData.status) {
+                tokenObject.startValueLp = createPoolData.startValueLp;
+
+                if (
+                  createPoolData.owner ===
+                  "39azUYFWPz3VHgKCf3VChUwbpURdCHRxjWVowf5jUJjg"
                 ) {
-                  tokenObject.lpBurned = "Rugged";
-                }
-              } else {
-                tokenObject.lpBurned = false;
-              }
-              if (lpStatus[lpStatus.length - 1].type === "CREATE_POOL") {
-                tokenObject.startValueLp =
-                  lpStatus[lpStatus.length - 1].tokenTransfers[1].tokenAmount;
-                
-                if (lpStatus[lpStatus.length - 1].feePayer === "39azUYFWPz3VHgKCf3VChUwbpURdCHRxjWVowf5jUJjg") {
-                  tokenObject.owner = "https://pump.fun/" + tokenObject.baseMint;
+                  tokenObject.owner =
+                    "https://pump.fun/" + tokenObject.baseMint;
                 } else {
-                  tokenObject.owner = lpStatus[lpStatus.length - 1].feePayer;                  
+                  tokenObject.owner = createPoolData.owner
                 }
-              } else {
-                tokenObject.startValueLp = "Failed to fetch";
+
+                const getLpTokensLeft = await getTokenSupply(
+                  createPoolData.lpTokenAddress
+                  
+                );
+                console.log("Lp tokens start: ", Math.round(createPoolData.lpTokenAmount))
+                console.log("Lp tokens after: ", Math.round(getLpTokensLeft))
+
+                if (Math.ceil(getLpTokensLeft) === Math.round(createPoolData.lpTokenAmount)) {
+                  tokenObject.lpBurned = false
+                  tokenObject.lpPoolBurned = 0
+                } else if (getLpTokensLeft + 1 < createPoolData.lpTokenAmount) {
+                  tokenObject.lpBurned = true;
+                  tokenObject.lpPoolBurned = 100 - (getLpTokensLeft / createPoolData.lpTokenAmount) * 100
+                } else {
+                  tokenObject.lpBurned = false;
+                  tokenObject.lpPoolBurned = 0;                  
+                }
               }
 
               let poolDataNotNull = false;
-              let poolInfo;
-              while (!poolDataNotNull) {
-                poolInfo = await fetchPoolInfo(eachToken.lpMint);
-                if (poolInfo.data !== null) {
 
-                  poolDataNotNull = true;
-                  tokenObject.imageUrl = poolInfo.data[0].mintA.logoURI;
-                } else {
+                const poolInfo = await fetchPoolInfo(eachToken.lpMint);
+
+                console.log("eachToken.lpMint: ", eachToken.lpMint);
+                console.log("poolInfo: ", poolInfo);
+                console.log("poolInfo.data[0]: ", poolInfo.data[0]);
+
+                if (poolInfo.data[0] === null) {
                   console.log("Pooldata is null");
+                  console.log("fetchTokens start: ", fetchTokens.length);
+                  fetchTokens.push(eachToken);
+                  console.log("fetchTokens end: ", fetchTokens.length);
+                  fetchTokens.splice(i, 1);
+                  console.log("fetchTokens break: ", fetchTokens.length);
+                  i--;
+                  break;
                 }
-              }
+
+
 
               const pool = poolInfo.data[0].id;
               const poolData = await fetchPoolInfoNew(pool);
@@ -175,10 +195,17 @@ export default function Tokens({ days, minStartlp, minTotalMc, minCurrentMc, tri
               tokenObject.supply = tokenSupply;
 
               const data = await getHistoricData(tokenObject.baseMint);
-              tokenObject.currentValue = data.currentValue;
-              tokenObject.currentMc = data.currentValue * tokenSupply;
-              tokenObject.maxMc = data.maxValue * tokenSupply;
-              tokenObject.maxValue = data.maxValue;
+              if (data.length === 0) {
+                tokenObject.currentValue = "New token, no historic data";
+                tokenObject.currentMc = "New token, no historic data";
+                tokenObject.maxMc = "New token, no historic data";
+                tokenObject.maxValue = "New token, no historic data";
+              } else {
+                tokenObject.currentValue = data.currentValue;
+                tokenObject.currentMc = data.currentValue * tokenSupply;
+                tokenObject.maxMc = data.maxValue * tokenSupply;
+                tokenObject.maxValue = data.maxValue;
+              }
 
               attempts = 0; // Exit loop on success
             } catch (err) {
@@ -189,6 +216,7 @@ export default function Tokens({ days, minStartlp, minTotalMc, minCurrentMc, tri
               );
             }
           }
+          console.log("tokenObject: ", tokenObject);
           result.push(tokenObject);
         }
         console.log("Results: ", result)
@@ -210,6 +238,46 @@ export default function Tokens({ days, minStartlp, minTotalMc, minCurrentMc, tri
         });
       }
 
+      const getCreatePoolData = async (lpMint) => {
+        const url = `https://api.helius.xyz/v0/addresses/${lpMint}/transactions?api-key=214a5e1f-bfc9-4e59-a1ce-f96533457125&type=CREATE_POOL`;
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data.length >= 1) {
+          return {
+            status: true,
+            lpTokenAmount:
+              data[data.length - 1].tokenTransfers[
+                data[data.length - 1].tokenTransfers.length - 1
+              ].tokenAmount,
+            startValueLp: data[data.length - 1].tokenTransfers[1].tokenAmount,
+            owner: data[data.length - 1].feePayer,
+            lpTokenAddress:
+              data[data.length - 1].tokenTransfers[
+                data[data.length - 1].tokenTransfers.length - 1
+              ].mint
+          };
+        } else {
+          return {
+            status: false,
+          };
+        }
+      };
+
+      const findBurnTransaction = async (lpMint) => {
+        const url = `https://api.helius.xyz/v0/addresses/${lpMint}/transactions?api-key=214a5e1f-bfc9-4e59-a1ce-f96533457125&type=BURN`;
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data.length >= 1) {
+          return {
+            status: true,
+            burnedLpTokenAmount: data[data.length - 1].tokenTransfers[0].tokenAmount,
+          };
+        } else {
+          return {
+            status: false,
+          };
+        }
+      };      
 
       const fetchPoolInfoNew = async (pool) => {
         const response = await fetch(
@@ -385,16 +453,15 @@ export default function Tokens({ days, minStartlp, minTotalMc, minCurrentMc, tri
             );
             const jsonResponse = await response.json();
             data = jsonResponse.data.items;
-
-            // Check if data is undefined or empty
-            if (!data || data.length === 0) {
-              throw new Error("Data is undefined or empty");
-            }
+            if (data.length < 1) {
+              return data
+            }    
 
             const highestValueObject = data.reduce(
               (max, obj) => (obj.value > max.value ? obj : max),
               data[0]
             );
+        
             tokenValueData.currentValue = data[data.length - 1].value;
             tokenValueData.maxValue = highestValueObject.value;
 
