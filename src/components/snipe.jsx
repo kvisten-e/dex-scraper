@@ -3,7 +3,7 @@ import * as web3 from '@solana/web3.js';
 import { SystemProgram, SystemInstruction, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { GlobalContext } from './GlobalContext.jsx';
 
-export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, transactionsAmountProp, maxTransactionsInWalletProp, dexChoiceProp, triggerAction, allDex, allDexArr }) {
+export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, transactionsAmountProp, maxTransactionsInWalletProp, dexChoiceProp, triggerAction, allDex, allDexArr, amountInclude, listenerMode }) {
 
   const { params } = useContext(GlobalContext)
   const { signal } = useContext(GlobalContext)
@@ -28,8 +28,12 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
 
   useEffect(() => {
     if (triggerAction) {
+
       async function main() {
+
+
         setSignatureAmount(0)
+        setProcessStepOne(0)
         setProcessSnipe([
           { step: "1. Get transactions from wallet/dex", completed: 0 },
           { step: "2. Find eligible transactions", completed: 0 },
@@ -41,16 +45,15 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
           await snipare(minValue, maxValue, decimaler, allDexArrFetch, maxTransactionsInWallet, transactionsAmount) 
         }
 
-        const formatedResult = removeDuplicates(resultList)
+        let formatedResult = removeDuplicates(resultList)
 
+        if (parseFloat(amountInclude) > 0) {
+          formatedResult = formatedResult.filter((obj) =>
+            containsSubstring(obj.amount.toString(), amountInclude.toString())
+          );
+        }       
         console.log("Result: ", formatedResult)
-        
-        resultList.sort((a, b) => {
-          const dateA = new Date(a.time);
-          const dateB = new Date(b.time);
-          return dateB - dateA;
-        });   
-        
+                
         setLoading(false)
         if (formatedResult) {
           setResultList([])
@@ -275,6 +278,11 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
           return false;
         });
       }     
+
+      function containsSubstring(amount, search) {
+        return amount.includes(search);
+      }
+
 
     }
   }, [buttonClickCounter]);
