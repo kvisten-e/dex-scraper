@@ -80,8 +80,10 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
             );
           }
           let formatedResult = removeDuplicates(result);
+          formatedResult = formatedResult.filter((element) => element !== undefined);
 
           if (parseFloat(amountInclude) > 0) {
+            console.log("formatedResult: ", formatedResult);
             formatedResult = formatedResult.filter((obj) =>
               containsSubstring(
                 obj.amount.toString(),
