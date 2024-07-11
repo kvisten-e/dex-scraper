@@ -129,9 +129,7 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
           }  
 
         } else {
-          console.log("Här1: ")
           const transactions = await getTransactionsNew(wallet, loops)
-          console.log("Här2: ", transactions)
 
           signatureValue = await getSignatureValue(walletNew, transactions, minValueNew, maxValueNew, decimalerNew, null)
         }
@@ -234,8 +232,6 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
 
               if (response && response.length > 0) {
                 signatures = signatures.concat(response);
-                console.log(signatures)
-                console.log(response[response.length - 1])
                 lastSignature = response[response.length - 1].signature;
 
               } else {
@@ -348,7 +344,6 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
 
     useEffect(() => {
       
-      console.log({ 'minValue': minValueProp, 'maxValue': maxValueProp, 'decimaler': decimalerProp, 'transactionsAmount': transactionsAmountProp, 'maxTransactionsInWallet': maxTransactionsInWalletProp, 'dexChoiceProp': dexChoiceProp, "triggerAction": triggerAction, "allDex": allDex, "allDexArr": allDexArr})
       setMinValue(minValueProp)
       setMaxValue(maxValueProp)
       setDecimaler(decimalerProp)
@@ -378,6 +373,7 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
   }, [logs]);
 
   useEffect(() => {
+    setAllDexBool(false)
     setTotalWallets(0)
     setCompletedDexes(0)
     setLoading(false);
@@ -422,10 +418,8 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
       };
 
       websocket.onmessage = async (event) => {
-        console.log("event: ", event);
         const response = JSON.parse(event.data);
         if (response.method === "logsNotification") {
-          console.log("Signature: ", response);
           let result = await snipareListener(
             minValue,
             maxValue,
@@ -434,7 +428,6 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
             response.params.result.value.signature,
             [wallet]
           );
-          console.log("Logs: ", result);
           if (parseFloat(amountInclude) > 0) {
             result = result.filter((obj) =>
               containsSubstring(obj.amount.toString(), amountInclude.toString())
@@ -486,7 +479,6 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
     const rotateRPC = createRPCRotator();
 
     let signatureValue = [];
-    console.log("Startar - Wallets:  ", wallet, " - ", "Signature: ", signature)
     signatureValue = await getSignatureValueListener(
       wallet,
       signature,
@@ -495,15 +487,11 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
       decimalerNew,
     );
 
-    console.log("signatureValue: ", signatureValue);
 
     if (signatureValue.length > 0) {
-      console.log("Inne1")
       setSignatureAmount(signatureValue.length);
       const result = await getWalletTransactions(signatureValue[0].wallet);
-      console.log("Inne1: ", result);
       if (result.length <= maxTransactionsInWalletNew) {
-      console.log("Inne2: ", signatureValue[0]);
         return signatureValue;
       } 
     }
@@ -639,7 +627,6 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
         }
 
 
-        console.log("TransactionsDetails: ", transactionDetails)
         if (transactionDetails) {
           for (const instruction of transactionDetails.transaction.message
             .instructions) {
@@ -648,12 +635,10 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
                 SystemProgram.programId.toBase58() &&
               wallet.includes(instruction.parsed.info.source)
             ) {
-              console.log("Här1")
               if (
                 instruction.parsed &&
                 instruction.parsed.type === "transfer"
               ) {
-                console.log("Här2");
                 const transferAmount =
                   instruction.parsed.info.lamports / LAMPORTS_PER_SOL;
                 const deci = countDecimals(transferAmount);
@@ -662,7 +647,6 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
                   transferAmount <= max_amount &&
                   deci <= decimaler
                 ) {
-                console.log("Här3");
                   const time = getFormattedDate(
                     transactionDetails.blockTime
                   );
@@ -701,8 +685,6 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
 
         if (response && response.length > 0) {
           signatures = signatures.concat(response);
-          console.log(signatures);
-          console.log(response[response.length - 1]);
           lastSignature = response[response.length - 1].signature;
         } else {
           console.log("No transactions found in loop: ", i);
@@ -715,7 +697,6 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
           }))
         );
       }
-      console.log("signatures amount:", signatures.length);
       signatures = signatures.map((signature) => signature.signature);
       return signatures;
     }
