@@ -28,22 +28,27 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
   const [logs, setLogs] = useState([]);
   const [ws, setWs] = useState(null);
   const [listening, setListeing] = useState(false)
-  const [listeringPaused, setListeringPaused] = useState(false)
   const [alertSoundToggle, setAlertSoundToggle] = useState(true)
   const prevLogsLengthRef = useRef(logs.length);
+  const [triggerActionProp, setTriggerActionProp] = useState(0)
 
 
   useEffect(() => {
     if (triggerAction) {
       async function main() {
+        setLogs([]);
+        setResult([])
+        setSignatureAmount(0);
+        setProcessStepOne(0);
+        setProcessSnipe([
+          {
+            step: "1. Get transactions from wallet/dex",
+            completed: 0,
+          },
+          { step: "2. Find eligible transactions", completed: 0 },
+        ]);
         if (!listenerMode) {
-          setLogs([]);
-          setSignatureAmount(0);
-          setProcessStepOne(0);
-          setProcessSnipe([
-            { step: "1. Get transactions from wallet/dex", completed: 0 },
-            { step: "2. Find eligible transactions", completed: 0 },
-          ]);
+
           setLoading(true);
           let result;
           if (!allDexBool) {
@@ -85,9 +90,7 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
           setListeing(true)
           if (!allDexBool) {
             // startScan([wallet])
-            startScan([
-              "CvYVDrvLLCdPfKMDLKXG9KtRg7D1aMimmdTZXiHDg4Pg",
-            ]);
+            startScan([wallet]);
           } else {
             const wallets = allDexArrFetch.map((item) => item.address);
             startScan(wallets);
@@ -96,8 +99,9 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
         
 
       }
-      main()
-
+      if (!listening && !loading) {
+        main();
+      } 
       async function snipare(minValueNew, maxValueNew, decimalerNew, walletNew, maxTransactionsInWalletNew, transactionsAmount ) {
 
         const rotateRPC = createRPCRotator();
@@ -303,8 +307,6 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
 
       }
 
-  
-
       function removeDuplicates(array) {
         const uniqueObjects = new Set();
         return array.filter(item => {
@@ -333,13 +335,6 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
       })));    
     },[processStepOne])
 
-    useEffect(() => {
-      return () => {
-        if (ws) {
-          ws.close();
-        }
-      };
-    }, [ws]);
 
     useEffect(() => {
       
@@ -353,6 +348,7 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
       setAllDexBool(allDex)
       setAllDexBoolFetch(allDexArr)
       setButtonClickCounter(prev => prev + 1)
+      setTriggerActionProp(triggerAction);
     }, [triggerAction])
   
     useEffect(() => {
@@ -370,8 +366,15 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
 
     prevLogsLengthRef.current = logs.length;
   }, [logs]);
+
+  useEffect(() => {
+    setListeing(false)
+    stopScan()
+    setTriggerActionProp(0)
+  },[listenerMode])
   
-    const startScan = async (wallets) => {
+  const startScan = async (wallets) => {
+    const websockets = wallets.map((wallet, index) => {
       const websocket = new WebSocket(
         "wss://mainnet.helius-rpc.com/?api-key=4bf6803d-1fc0-4157-9f60-904fc8a1765e"
       );
@@ -379,11 +382,11 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
       websocket.onopen = () => {
         const subscribeMessage = JSON.stringify({
           jsonrpc: "2.0",
-          id: 1,
+          id: index + 1,
           method: "logsSubscribe",
           params: [
             {
-              mentions: wallets,
+              mentions: [wallet],
             },
             {
               commitment: "confirmed",
@@ -394,42 +397,58 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
       };
 
       websocket.onmessage = async (event) => {
-        console.log("event: ", event)
+        console.log("event: ", event);
         const response = JSON.parse(event.data);
         if (response.method === "logsNotification") {
           console.log("Signature: ", response);
-          const result = await snipareListener(
+          let result = await snipareListener(
             minValue,
             maxValue,
             decimaler,
             maxTransactionsInWallet,
             response.params.result.value.signature,
-            wallets
+            [wallet]
           );
-          console.log("Logs: ", result)
+          console.log("Logs: ", result);
+          if (parseFloat(amountInclude) > 0) {
+            result = result.filter((obj) =>
+              containsSubstring(obj.amount.toString(), amountInclude.toString())
+            );
+          }
           setLogs((prevLogs) => [...result, ...prevLogs]);
-
         }
+      };
+
+      function containsSubstring(amount, search) {
+        return amount.includes(search);
       };
 
       websocket.onclose = () => {
-        console.log("WebSocket connection closed");
+        console.log(`WebSocket connection closed for wallet ${wallet}`);
       };
 
-      setWs(websocket);
-    };
+      return websocket;
+    });
 
-    const stopScan = () => {
-        setListeing(false)
-        if (ws) {
-          ws.close();
-          setWs(null);
-        }
-    };
+    setWs(websockets);
 
-    const clearScan = () => {
-      setLogs([])
-    };  
+    
+  };
+
+  const stopScan = () => {
+    setListeing(false);
+    if (ws) {
+      ws.forEach((websocket) => websocket.close());
+      setWs(null);
+    }
+  };
+
+  const clearScan = () => {
+    setLogs([])
+  }; 
+
+
+  
   
     async function snipareListener(
       minValueNew,
@@ -475,9 +494,6 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
               { commitment: "finalized" }
             );
             if (signatures) {
-              setProcessStepOne(
-                (prevProcessStepOne) => prevProcessStepOne + 1
-              );
               return signatures;
             }
             return [];
@@ -817,14 +833,16 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
               ))
             : !loading &&
               !result.length > 0 &&
-              triggerAction !== 0 && <p>No Wallets found</p>}
+              triggerActionProp !== 0 && <p>No Wallets found</p>}
         </div>
       ) : (
         <div className="found-tokens">
           {listening ? (
             <>
-              <button onClick={stopScan}>Stop</button>
-              <button onClick={clearScan}>Clear</button>
+              <div style={{marginBottom: "10px", display: "flex", justifyContent: "center"}}>
+                <button onClick={stopScan}>Stop</button>
+                <button onClick={clearScan}>Clear</button>
+              </div>
             </>
           ) : (
             <></>
