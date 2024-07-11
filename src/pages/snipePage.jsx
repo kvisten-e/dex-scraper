@@ -11,6 +11,7 @@ export default function snipeCreator() {
   const [minValue, setMinValue] = useState(() => localStorage.getItem('minValue') || '60')
   const [maxValue, setMaxValue] = useState(() => localStorage.getItem('maxValue') || '80')
   const [decimaler, setDecimaler] = useState(() => localStorage.getItem('decimaler') || '50')
+  const [amountInclude, setAmountInclude] = useState();
   const [inputWallet, setInputWallet] = useState('')
   const [transactionsAmount, settransactionsAmount] = useState(() => localStorage.getItem('transactionsAmount') || '1000')
   const [maxTransactionsInWallet, setMaxTransactionsInWallet] = useState(() => localStorage.getItem('maxTransactionsInWallet') || '10')
@@ -19,6 +20,8 @@ export default function snipeCreator() {
   const { savedWallets, defaultWallets } = useContext(SavedContext)
   const [allDex, setAllDex] = useState(false)
   const { processSnipe, setProcessSnipe } = useContext(GlobalContext)
+  const [listenerMode, setListenerMode] = useState(false);
+  const [alertSound, setAlertSound] = useState(true)
   
 
   const [triggerCount, setTriggerCount] = useState(0);
@@ -55,6 +58,14 @@ export default function snipeCreator() {
     localStorage.setItem('maxTransactionsInWallet', maxTransactionsInWallet);
   }, [minValue, maxValue, decimaler, transactionsAmount, maxTransactionsInWallet])
 
+  const handleCheckboxChange = (event) => {
+    setListenerMode(event.target.checked);
+  };
+
+  const handleChangeAlertSound = (event) => {
+    setAlertSound(event.target.checked);
+  };
+
   const changeMinValue = (e) => {
     setMinValue(Number(e.target.value));
   }
@@ -65,6 +76,10 @@ export default function snipeCreator() {
   const changeDecimaler = (e) => {
     setDecimaler(Number(e.target.value));  
   }
+
+  const changeAmountInclude= (e) => {
+    setAmountInclude(e.target.value);
+  };
 
   const changeMaxTransaction = (e) => {
     setMaxTransactionsInWallet(Number(e.target.value)); 
@@ -128,6 +143,15 @@ export default function snipeCreator() {
       <div id="main-pump">
         <div id="first-pump">
           <h1>Snipe Creator</h1>
+          <label style={{ width: "60%", borderBottom: "2px solid black" }}>
+            <h4>Listener Mode</h4>
+            <input
+              type="checkbox"
+              checked={listenerMode}
+              onChange={handleCheckboxChange}
+              style={{ width: "20px", height: "20px" }}
+            />
+          </label>
           <div>
             <h4>Min value</h4>
             <input type="number" value={minValue} onChange={changeMinValue} />
@@ -141,43 +165,112 @@ export default function snipeCreator() {
             <input type="number" value={decimaler} onChange={changeDecimaler} />
           </div>
           <div>
+            <h4>Amount include (example: .03)</h4>
+            <input
+              type="text"
+              value={amountInclude}
+              onChange={changeAmountInclude}
+            />
+          </div>
+          <div>
             <h4>Max transactions in wallet</h4>
-            <input type="number" value={maxTransactionsInWallet} onChange={changeMaxTransaction} />
-          </div>       
+            <input
+              type="number"
+              value={maxTransactionsInWallet}
+              onChange={changeMaxTransaction}
+            />
+          </div>
           <div>
             <h4>Select DEX</h4>
             <select value={dexChoice} onChange={handleChangeDex}>
               {csvData.map((option, index) => (
-                <option key={index} value={option.address}>{option.name}</option>
+                <option key={index} value={option.address}>
+                  {option.name}
+                </option>
               ))}
-            </select>         
-          </div>  
-          <div>
-            <input type="search" id="walletAddy" value={inputWallet} placeholder="Input a wallet address" onChange={(e) => setInputWallet(e.target.value)} />
-          </div>          
-          <div>
-            <h4>Select total transactions</h4>
-            <select value={transactionsAmount} onChange={handleChangeAmount}>
-              {amounts.map((amount, index) => (
-                <option key={index} value={amount}>{amount}</option>
-              ))}
-            </select>         
+            </select>
           </div>
           <div>
-            <button onClick={handleSnipeTrigger}>Search for wallets</button>
-            <button onClick={handleSnipeTriggerAll}>Search for wallet on all</button>
+            <input
+              type="search"
+              id="walletAddy"
+              value={inputWallet}
+              placeholder="Input a wallet address"
+              onChange={(e) => setInputWallet(e.target.value)}
+            />
           </div>
-          <div className='show-process-bars'>
-            {processSnipe.map((key, index) => (
-              <div key={index} className='key'>
-                <p>{key.step}</p>
-                <ProgressBar animated now={key.completed} max={100} variant='success' />
+          {!listenerMode ? (
+            <div>
+              <div>
+                <h4>Select total transactions</h4>
+                <select
+                  value={transactionsAmount}
+                  onChange={handleChangeAmount}
+                >
+                  {amounts.map((amount, index) => (
+                    <option key={index} value={amount}>
+                      {amount}
+                    </option>
+                  ))}
+                </select>
               </div>
-            ))}
-          </div>
+
+              <div style={{ marginTop: "20px" }}>
+                <button onClick={handleSnipeTrigger}>Search for wallets</button>
+                <button onClick={handleSnipeTriggerAll}>
+                  Search for wallet on all
+                </button>
+              </div>
+
+              <div className="show-process-bars">
+                {processSnipe.map((key, index) => (
+                  <div key={index} className="key">
+                    <p>{key.step}</p>
+                    <ProgressBar
+                      animated
+                      now={key.completed}
+                      max={100}
+                      variant="success"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <>
+              <label style={{ marginTop: "20px" }}>
+                <h4>Alert sound</h4>
+                <input
+                  type="checkbox"
+                  checked={alertSound}
+                  onChange={handleChangeAlertSound}
+                  style={{ width: "20px", height: "20px" }}
+                />
+              </label>
+              <div style={{ marginTop: "20px" }}>
+                <button onClick={handleSnipeTrigger}>Listen on wallet</button>
+                <button onClick={handleSnipeTriggerAll}>
+                  Listen on all wallets
+                </button>
+              </div>
+            </>
+          )}
         </div>
         <div id="seconds-pump">
-          <Snipe minValueProp={minValue} maxValueProp={maxValue} decimalerProp={decimaler} transactionsAmountProp={transactionsAmount} maxTransactionsInWalletProp={maxTransactionsInWallet} dexChoiceProp={dexChoice} triggerAction={triggerCount} allDex={allDex} allDexArr={csvData} />
+          <Snipe
+            minValueProp={minValue}
+            maxValueProp={maxValue}
+            decimalerProp={decimaler}
+            transactionsAmountProp={transactionsAmount}
+            maxTransactionsInWalletProp={maxTransactionsInWallet}
+            dexChoiceProp={dexChoice}
+            triggerAction={triggerCount}
+            allDex={allDex}
+            allDexArr={csvData}
+            listenerMode={listenerMode}
+            amountInclude={amountInclude}
+            alertSound={alertSound}
+          />
         </div>
       </div>
     </>
