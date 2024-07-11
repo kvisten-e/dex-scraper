@@ -396,9 +396,7 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
   
   const startScan = async (wallets) => {
     const websockets = wallets.map((wallet, index) => {
-      const websocket = new WebSocket(
-        "wss://mainnet.helius-rpc.com/?api-key=4bf6803d-1fc0-4157-9f60-904fc8a1765e"
-      );
+      const websocket = new WebSocket(import.meta.env.VITE_WSS);
 
       websocket.onopen = () => {
         const subscribeMessage = JSON.stringify({
