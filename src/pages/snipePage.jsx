@@ -26,6 +26,8 @@ export default function snipeCreator() {
   const [telegramUsername, setTelegramUsername] = useState(() => localStorage.getItem('telegramUsername') || '')
   const [telegramUsernameId, setTelegramUsernameId] = useState('')
   const [telegramLoading, setTelegramLoading] = useState(false)
+  const [telegramData, setTelegramData] = useState([])
+  const fetchInitiated = useRef(false);
   
 
   const [triggerCount, setTriggerCount] = useState(0);
@@ -63,7 +65,6 @@ export default function snipeCreator() {
     localStorage.setItem('maxTransactionsInWallet', maxTransactionsInWallet);
   }, [minValue, maxValue, decimaler, transactionsAmount, maxTransactionsInWallet, telegramUsername])
 
-
   useEffect(() => {
     async function fetchTelegramData() {
       const response = await fetch(
@@ -76,19 +77,30 @@ export default function snipeCreator() {
       }
 
       const data = await response.json();
+      setTelegramData(data.result);
+    }
+
+    if (!fetchInitiated.current) {
+      fetchInitiated.current = true;
+      fetchTelegramData();
+    }
+  }, []);
+
+  useEffect(() => {
+    async function fetchTelegramData() {
       try {
-        const matchedUpdate = data.result.find(
+        const matchedUpdate = telegramData.find(
           (update) =>
-            update.message.from.username.toLowerCase() ===
+            update.message.from.username ===
             telegramUsername.toLowerCase()
         );
-
         if (matchedUpdate) {
           setTelegramUsernameId(matchedUpdate.message.from.id);
         } else {
           setTelegramUsernameId("");
         }
       } catch (error) {
+        console.log("Error: ", error)
         setTelegramUsernameId("");
       }
       setTelegramLoading(false);
