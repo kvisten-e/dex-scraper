@@ -92,8 +92,9 @@ export default function snipeCreator() {
         const matchedUpdate = telegramData.find(
           (update) =>
             update.message.from.username ===
-            telegramUsername.toLowerCase()
+            telegramUsername
         );
+        console.log(matchedUpdate);
         if (matchedUpdate) {
           setTelegramUsernameId(matchedUpdate.message.from.id);
         } else {
