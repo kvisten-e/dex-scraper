@@ -1,0 +1,51 @@
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+input[type="search"] {
+  padding-right: 30px;
+  /* space for the status icon */
+}
+
+.status-icon {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  span{
+    margin-left: 5px;
+    font-size: 20px;
+  }
+}
+
+.loader {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+      margin-left: 5px;
+      margin-top: 5px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.checkmark {
+  color: green;
+  font-size: 16px;
+}
+
+.crossmark {
+  color: red;
+  font-size: 16px;
+}

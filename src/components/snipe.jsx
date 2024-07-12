@@ -4,7 +4,7 @@ import { SystemProgram, SystemInstruction, LAMPORTS_PER_SOL } from '@solana/web3
 import { GlobalContext } from './GlobalContext.jsx';
 import { SavedContext } from "./SavedWalletContext.jsx";
 
-export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, transactionsAmountProp, maxTransactionsInWalletProp, dexChoiceProp, triggerAction, allDex, allDexArr, amountInclude, listenerMode, alertSound }) {
+export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, transactionsAmountProp, maxTransactionsInWalletProp, dexChoiceProp, triggerAction, allDex, allDexArr, amountInclude, listenerMode, alertSound, telegramUsernameId, telegramToggle }) {
 
   const { params } = useContext(GlobalContext)
   const { signal } = useContext(GlobalContext)
@@ -366,6 +366,14 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
   useEffect(() => {
 
     if (logs.length > prevLogsLengthRef.current) {
+      if (telegramToggle && telegramUsernameId !== '') {
+        const obj = logs[0];
+        sendMessageToTelegram(
+          `*${obj.dex} - ${obj.amount} SOL*\n\nWallet: ${obj.wallet}\nTime: ${obj.time}\nAmount: ${obj.amount}\nDEX: ${obj.dex}\n\nhttps://solscan.io/account/${obj.wallet}`,
+          "HTML"
+        );
+      }
+
       if (alertSoundToggle && listening) {
         playAudio();
       }
@@ -465,7 +473,34 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
     setLogs([])
   }; 
 
+const sendMessageToTelegram = async (message) => {
+  const url = `https://api.telegram.org/bot${import.meta.env.VITE_TELEGRAM_BOT}/sendMessage`;
+  const payload = {
+    chat_id: telegramUsernameId,
+    text: message,
+    parse_mode: "Markdown",
+  };
 
+  try {
+    // Using fetch
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      console.log("Message sent successfully");
+    } else {
+      console.error("Failed to send message");
+    }
+
+  } catch (error) {
+    console.error("Error sending message:", error);
+  }
+};
   
   
   async function snipareListener(

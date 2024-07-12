@@ -3,7 +3,7 @@
 @import url(../public/style/show-result.css);
 @import url(../public/style/savedWallets.css);
 @import url(../public/style/pump.css);
-
+@import url(../public/style/snipe.css);
 
 .btn-play {
   cursor: pointer;

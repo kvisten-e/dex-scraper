@@ -22,6 +22,10 @@ export default function snipeCreator() {
   const { processSnipe, setProcessSnipe } = useContext(GlobalContext)
   const [listenerMode, setListenerMode] = useState(false);
   const [alertSound, setAlertSound] = useState(true)
+  const [telegramToggle, setTelegramToggle] = useState(false)
+  const [telegramUsername, setTelegramUsername] = useState(() => localStorage.getItem('telegramUsername') || '')
+  const [telegramUsernameId, setTelegramUsernameId] = useState('')
+  const [telegramLoading, setTelegramLoading] = useState(false)
   
 
   const [triggerCount, setTriggerCount] = useState(0);
@@ -54,9 +58,48 @@ export default function snipeCreator() {
     localStorage.setItem('minValue', minValue);
     localStorage.setItem('maxValue', maxValue);
     localStorage.setItem('decimaler', decimaler);
+    localStorage.setItem("telegramUsername", telegramUsername);
     localStorage.setItem('transactionsAmount', transactionsAmount);
     localStorage.setItem('maxTransactionsInWallet', maxTransactionsInWallet);
-  }, [minValue, maxValue, decimaler, transactionsAmount, maxTransactionsInWallet])
+  }, [minValue, maxValue, decimaler, transactionsAmount, maxTransactionsInWallet, telegramUsername])
+
+
+  useEffect(() => {
+    async function fetchTelegramData() {
+      const response = await fetch(
+        `https://api.telegram.org/bot${
+          import.meta.env.VITE_TELEGRAM_BOT
+        }/getUpdates`
+      );
+      if (!response.ok) {
+        return null;
+      }
+
+      const data = await response.json();
+      try {
+        const matchedUpdate = data.result.find(
+          (update) =>
+            update.message.from.username.toLowerCase() ===
+            telegramUsername.toLowerCase()
+        );
+
+        if (matchedUpdate) {
+          setTelegramUsernameId(matchedUpdate.message.from.id);
+        } else {
+          setTelegramUsernameId("");
+        }
+      } catch (error) {
+        setTelegramUsernameId("");
+      }
+      setTelegramLoading(false);
+    }
+    if (telegramToggle) {
+      setTelegramLoading(true);
+      fetchTelegramData();
+    }
+  }, [telegramUsername, telegramToggle]);
+
+
 
   const handleCheckboxChange = (event) => {
     setListenerMode(event.target.checked);
@@ -64,6 +107,11 @@ export default function snipeCreator() {
 
   const handleChangeAlertSound = (event) => {
     setAlertSound(event.target.checked);
+  };
+
+
+  const handleTelegram = (event) => {
+    setTelegramToggle(event.target.checked);
   };
 
   const changeMinValue = (e) => {
@@ -113,6 +161,10 @@ export default function snipeCreator() {
   }  
 
   const handleSnipeTrigger = () => {
+    if (telegramToggle && telegramUsernameId === '' || telegramLoading === true) {
+
+      return
+    }
     if (inputWallet === '') {
       setAllDex(false)
       setTriggerCount(prev => prev + 1);  
@@ -128,12 +180,13 @@ export default function snipeCreator() {
         console.log("Wrong wallet")
       }      
     }
-
-
-    
-
   } 
+
   const handleSnipeTriggerAll = () => {  
+    if (telegramToggle && telegramUsernameId === "" && telegramLoading === true) {
+      return
+    }
+
     setAllDex(true)  
     setTriggerCount(prev => prev + 1); 
   } 
@@ -238,15 +291,56 @@ export default function snipeCreator() {
             </div>
           ) : (
             <>
-              <label style={{ marginTop: "20px" }}>
-                <h4>Alert sound</h4>
-                <input
-                  type="checkbox"
-                  checked={alertSound}
-                  onChange={handleChangeAlertSound}
-                  style={{ width: "20px", height: "20px" }}
-                />
-              </label>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <label style={{ marginTop: "20px" }}>
+                  <h4>Alert sound</h4>
+                  <input
+                    type="checkbox"
+                    checked={alertSound}
+                    onChange={handleChangeAlertSound}
+                    style={{ width: "20px", height: "20px" }}
+                  />
+                </label>
+                <label style={{ marginTop: "20px" }}>
+                  <h4>Telegram Messages</h4>
+                  <input
+                    type="checkbox"
+                    checked={telegramToggle}
+                    onChange={handleTelegram}
+                    style={{ width: "20px", height: "20px" }}
+                  />
+                </label>
+                {telegramToggle ? (
+                  <div style={{ display: "flex" }}>
+                    <input
+                      type="search"
+                      id="telegramUserame"
+                      value={telegramUsername}
+                      placeholder="Telegram username"
+                      onChange={(e) => setTelegramUsername(e.target.value)}
+                    />
+                    <span className="status-icon">
+                      {telegramLoading === false &&
+                        telegramUsernameId === "" &&
+                        telegramUsername === "" && <></>}
+                      {telegramLoading === true && (
+                        <div className="loader"></div>
+                      )}
+                      {telegramLoading === false &&
+                        telegramUsernameId !== "" && (
+                          <span className="checkmark">✔️</span>
+                        )}
+                      {telegramLoading === false &&
+                        telegramUsernameId === "" &&
+                        telegramUsername !== "" && (
+                          <span className="crossmark">❌</span>
+                        )}
+                    </span>
+                  </div>
+                ) : (
+                  <></>
+                )}
+              </div>
               <div style={{ marginTop: "20px" }}>
                 <button onClick={handleSnipeTrigger}>Listen on wallet</button>
                 <button onClick={handleSnipeTriggerAll}>
@@ -270,6 +364,8 @@ export default function snipeCreator() {
             listenerMode={listenerMode}
             amountInclude={amountInclude}
             alertSound={alertSound}
+            telegramUsernameId={telegramUsernameId}
+            telegramToggle={telegramToggle}
           />
         </div>
       </div>
