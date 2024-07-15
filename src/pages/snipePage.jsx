@@ -6,6 +6,7 @@ import { csvParse } from 'd3-dsv';
 import { SavedContext } from "../components/SavedWalletContext.jsx";
 import ProgressBar from 'react-bootstrap/ProgressBar';
 
+
 export default function snipeCreator() {
   
   const [minValue, setMinValue] = useState(() => localStorage.getItem('minValue') || '60')
@@ -27,8 +28,16 @@ export default function snipeCreator() {
   const [telegramUsernameId, setTelegramUsernameId] = useState('')
   const [telegramLoading, setTelegramLoading] = useState(false)
   const [telegramData, setTelegramData] = useState([])
+  const [telegramUsers, setTelegramUsers] = useState([])
   const fetchInitiated = useRef(false);
-  
+
+  useEffect(() => {
+    fetch("http://127.0.0.1:3000/data")
+      .then((response) => response.json())
+      .then((data) => setTelegramData(data))
+      .catch((error) => console.error("Error fetching data:", error));
+  }, []);
+
 
   const [triggerCount, setTriggerCount] = useState(0);
 
@@ -65,38 +74,19 @@ export default function snipeCreator() {
     localStorage.setItem('maxTransactionsInWallet', maxTransactionsInWallet);
   }, [minValue, maxValue, decimaler, transactionsAmount, maxTransactionsInWallet, telegramUsername])
 
-  useEffect(() => {
-    async function fetchTelegramData() {
-      const response = await fetch(
-        `https://api.telegram.org/bot${
-          import.meta.env.VITE_TELEGRAM_BOT
-        }/getUpdates`
-      );
-      if (!response.ok) {
-        return null;
-      }
-
-      const data = await response.json();
-      setTelegramData(data.result);
-    }
-
-    if (!fetchInitiated.current) {
-      fetchInitiated.current = true;
-      fetchTelegramData();
-    }
-  }, []);
 
   useEffect(() => {
+
     async function fetchTelegramData() {
       try {
         const matchedUpdate = telegramData.find(
           (update) =>
-            update.message.from.username ===
-            telegramUsername
+            update.username ===
+            telegramUsername.toLowerCase()
         );
         console.log(matchedUpdate);
         if (matchedUpdate) {
-          setTelegramUsernameId(matchedUpdate.message.from.id);
+          setTelegramUsernameId(matchedUpdate.userID);
         } else {
           setTelegramUsernameId("");
         }
@@ -107,6 +97,7 @@ export default function snipeCreator() {
       setTelegramLoading(false);
     }
     if (telegramToggle) {
+      console.log("telegramData: ", telegramData);
       setTelegramLoading(true);
       fetchTelegramData();
     }
@@ -203,7 +194,6 @@ export default function snipeCreator() {
     setAllDex(true)  
     setTriggerCount(prev => prev + 1); 
   } 
-
   return (
     <>
       <div id="main-pump">

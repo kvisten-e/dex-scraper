@@ -11,8 +11,8 @@ import Pump from "../pages/pumpPage.jsx"
 import Snipe from "../pages/snipePage.jsx"
 import AudioButton from "./playbutton.jsx";
 
-
 function Router() {
+
   return (
     <GlobalProvider>
       <BrowserRouter>
