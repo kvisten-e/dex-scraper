@@ -366,12 +366,15 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
   useEffect(() => {
 
     if (logs.length > prevLogsLengthRef.current) {
-      if (telegramToggle && telegramUsernameId !== '') {
+      if (telegramToggle && telegramUsernameId.length !== 0) {
         const obj = logs[0];
-        sendMessageToTelegram(
-          `*${obj.dex} - ${obj.amount} SOL*\n\nWallet: ${obj.wallet}\nTime: ${obj.time}\nAmount: ${obj.amount}\nDEX: ${obj.dex}\n\nhttps://solscan.io/account/${obj.wallet}`,
-          "HTML"
-        );
+        for (let eachId of telegramUsernameId) {
+          sendMessageToTelegram(
+            `*${obj.dex} - ${obj.amount} SOL*\n\nWallet: ${obj.wallet}\nTime: ${obj.time}\nAmount: ${obj.amount}\nDEX: ${obj.dex}\n\nhttps://solscan.io/account/${obj.wallet}`,
+            eachId,
+          );          
+        }
+
       }
 
       if (alertSoundToggle && listening) {
@@ -452,7 +455,6 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
       websocket.onclose = () => {
         console.log(`WebSocket connection closed for wallet ${wallet}`);
       };
-
       return websocket;
     });
 
@@ -473,10 +475,10 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
     setLogs([])
   }; 
 
-const sendMessageToTelegram = async (message) => {
+  const sendMessageToTelegram = async (message, id) => {
   const url = `https://api.telegram.org/bot${import.meta.env.VITE_TELEGRAM_BOT}/sendMessage`;
   const payload = {
-    chat_id: telegramUsernameId,
+    chat_id: id,
     text: message,
     parse_mode: "Markdown",
   };

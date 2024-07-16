@@ -25,7 +25,7 @@ export default function snipeCreator() {
   const [alertSound, setAlertSound] = useState(true)
   const [telegramToggle, setTelegramToggle] = useState(false)
   const [telegramUsername, setTelegramUsername] = useState(() => localStorage.getItem('telegramUsername') || '')
-  const [telegramUsernameId, setTelegramUsernameId] = useState('')
+  const [telegramUsernameIds, setTelegramUsernameIds] = useState([])
   const [telegramLoading, setTelegramLoading] = useState(false)
   const [telegramData, setTelegramData] = useState([])
   const [telegramUsers, setTelegramUsers] = useState([])
@@ -79,20 +79,31 @@ export default function snipeCreator() {
 
     async function fetchTelegramData() {
       try {
-        const matchedUpdate = telegramData.find(
-          (update) =>
-            update.username ===
-            telegramUsername.toLowerCase()
-        );
-        console.log(matchedUpdate);
-        if (matchedUpdate) {
-          setTelegramUsernameId(matchedUpdate.userID);
-        } else {
-          setTelegramUsernameId("");
+        const arr = telegramUsername.split(" ")
+        const length = arr.length
+        const tempArrIds = []
+        console.log("arr: ", arr);
+        console.log("length: ", length)
+        console.log("tempArrIds", tempArrIds);
+          for (let eachUsername of arr) {
+          const matchedUpdate = telegramData.find(
+            (update) => update.username === eachUsername.toLowerCase()
+          );
+          console.log(matchedUpdate);
+            if (matchedUpdate) {
+              tempArrIds.push(matchedUpdate.userID);
+            // setTelegramUsernameId(...telegramUsernameId, matchedUpdate.userID);
+          }
         }
+        if (tempArrIds.length === length) {
+          setTelegramUsernameIds(tempArrIds);
+        } else {
+          setTelegramUsernameIds([])
+        }
+
       } catch (error) {
         console.log("Error: ", error)
-        setTelegramUsernameId("");
+        setTelegramUsernameIds([]);
       }
       setTelegramLoading(false);
     }
@@ -165,7 +176,7 @@ export default function snipeCreator() {
   }  
 
   const handleSnipeTrigger = () => {
-    if (telegramToggle && telegramUsernameId === '' || telegramLoading === true) {
+    if (telegramToggle && telegramUsernameIds.length === 0 || telegramLoading === true) {
 
       return
     }
@@ -187,7 +198,7 @@ export default function snipeCreator() {
   } 
 
   const handleSnipeTriggerAll = () => {  
-    if (telegramToggle && telegramUsernameId === "" && telegramLoading === true) {
+    if (telegramToggle && telegramUsernameIds.length === 0 && telegramLoading === true) {
       return
     }
 
@@ -324,17 +335,17 @@ export default function snipeCreator() {
                     />
                     <span className="status-icon">
                       {telegramLoading === false &&
-                        telegramUsernameId === "" &&
+                        telegramUsernameIds.length === 0 &&
                         telegramUsername === "" && <></>}
                       {telegramLoading === true && (
                         <div className="loader"></div>
                       )}
                       {telegramLoading === false &&
-                        telegramUsernameId !== "" && (
+                        telegramUsernameIds.length !== 0 && (
                           <span className="checkmark">✔️</span>
                         )}
                       {telegramLoading === false &&
-                        telegramUsernameId === "" &&
+                        telegramUsernameIds.length === 0 &&
                         telegramUsername !== "" && (
                           <span className="crossmark">❌</span>
                         )}
@@ -367,7 +378,7 @@ export default function snipeCreator() {
             listenerMode={listenerMode}
             amountInclude={amountInclude}
             alertSound={alertSound}
-            telegramUsernameId={telegramUsernameId}
+            telegramUsernameId={telegramUsernameIds}
             telegramToggle={telegramToggle}
           />
         </div>
