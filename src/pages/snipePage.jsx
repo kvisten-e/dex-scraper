@@ -36,7 +36,7 @@ export default function snipeCreator() {
       .then((response) => response.json())
       .then((data) => setTelegramData(data))
       .catch((error) => console.error("Error fetching data:", error));
-  }, []);
+  }, [telegramUsername]);
 
 
   const [triggerCount, setTriggerCount] = useState(0);
