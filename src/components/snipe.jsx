@@ -370,8 +370,8 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
         const obj = logs[0];
         for (let eachId of telegramUsernameId) {
           sendMessageToTelegram(
-            `*${obj.dex} - ${obj.amount} SOL*\n\nWallet: ${obj.wallet}\nTime: ${obj.time}\nAmount: ${obj.amount}\nDEX: ${obj.dex}\n\nhttps://solscan.io/account/${obj.wallet}`,
-            eachId,
+            `💸*${obj.dex} - ${obj.amount} SOL*\n\nWallet: ${obj.wallet}\nTime: ${obj.time}\nAmount: ${obj.amount}\nDEX: ${obj.dex}\n\nhttps://solscan.io/account/${obj.wallet}`,
+            eachId
           );          
         }
 
