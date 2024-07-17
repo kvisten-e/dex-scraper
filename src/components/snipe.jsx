@@ -26,16 +26,21 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
   const [processStepOne, setProcessStepOne] = useState(1)
   const [signatureAmount, setSignatureAmount] = useState(0)
   const [logs, setLogs] = useState([]);
-  const [ws, setWs] = useState(null);
+  const [ws, setWs] = useState([]);
   const [listening, setListeing] = useState(false)
   const [alertSoundToggle, setAlertSoundToggle] = useState(true)
   const prevLogsLengthRef = useRef(logs.length);
   const [triggerActionProp, setTriggerActionProp] = useState(0)
   const { defaultWallets } = useContext(SavedContext);
-
+  const [isOpen, setIsOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
   const totalPages = Math.ceil(logs.length / itemsPerPage);
+  const [liveConnectionWallets, setLiveConnectionWallets] = useState([])
+
+  const toggleList = () => {
+    setIsOpen(!isOpen);
+  };
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -99,7 +104,6 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
         } else {
           setListeing(true)
           if (!allDexBool) {
-            // startScan([wallet])
             startScan([wallet]);
           } else {
             const wallets = allDexArrFetch.map((item) => item.address);
@@ -412,6 +416,7 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
       const websocket = new WebSocket(import.meta.env.VITE_WSS);
 
       websocket.onopen = () => {
+        setLiveConnectionWallets((prevWallets) => [...prevWallets, wallet]);
         const subscribeMessage = JSON.stringify({
           jsonrpc: "2.0",
           id: index + 1,
@@ -453,11 +458,13 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
       };
 
       websocket.onclose = () => {
+        setLiveConnectionWallets((prevWallets) =>
+          prevWallets.filter((w) => w !== wallet)
+        );
         console.log(`WebSocket connection closed for wallet ${wallet}`);
       };
       return websocket;
     });
-
     setWs(websockets);
 
     
@@ -467,7 +474,7 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
     setListeing(false);
     if (ws) {
       ws.forEach((websocket) => websocket.close());
-      setWs(null);
+      setWs([]);
     }
   };
 
@@ -825,7 +832,8 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
 
       return 0;
     }
-
+  }
+  
     function findNameByAddress(address) {
       for (let item of defaultWallets) {
         if (item.address.trim() === address.trim()) {
@@ -834,8 +842,6 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
       }
       return address;
     }
-  }
-  
 
 
   function playAudio() {
@@ -849,6 +855,28 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
     });
   }
   
+  const styles = {
+    listContainer: {
+      margin: "10px 0",
+    },
+    header: {
+      cursor: "pointer",
+      fontWeight: "bold",
+      padding: "5px",
+      backgroundColor: "#f2f2f2",
+      border: "1px solid #ddd",
+    },
+    values: {
+      padding: 0,
+      margin: 0,
+    },
+    listItem: {
+      listStyleType: "none",
+      padding: "5px",
+      borderBottom: "1px solid #ddd",
+    },
+  };
+
   return (
     <>
       {!listenerMode ? (
@@ -889,6 +917,40 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
         </div>
       ) : (
         <div className="found-tokens">
+          {ws.length > 0 ? (
+            <div style={styles.listContainer}>
+              {allDexBool ? (
+                <div style={styles.header} onClick={toggleList}>
+                  Connections: {ws.length} / {allDexArrFetch.length} 🟢
+                </div>
+              ) : (
+                <div style={styles.header} onClick={toggleList}>
+                  Connections: {ws.length} / 1 🟢
+                </div>
+              )}
+              {isOpen && (
+                <ul style={styles.values}>
+                  {liveConnectionWallets.map((item, index) => (
+                    <li key={index} style={styles.listItem}>
+                      Dex: {findNameByAddress(item)}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ) : (
+            <>
+              {allDexBool ? (
+                <div style={styles.header} onClick={toggleList}>
+                  Connections: {ws.length} / {allDexArrFetch.length} 🔴
+                </div>
+              ) : (
+                <div style={styles.header} onClick={toggleList}>
+                  Connections: {ws.length} / 1 🔴
+                </div>
+              )}
+            </>
+          )}
           {listening ? (
             <>
               <div

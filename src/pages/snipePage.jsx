@@ -204,7 +204,17 @@ export default function snipeCreator() {
 
     setAllDex(true)  
     setTriggerCount(prev => prev + 1); 
-  } 
+  }
+  
+  function findNameByAddress(address) {
+    for (let item of defaultWallets) {
+      if (item.address.trim() === address.trim()) {
+        return item.name;
+      }
+    }
+    return address;
+  }
+
   return (
     <>
       <div id="main-pump">
@@ -356,9 +366,11 @@ export default function snipeCreator() {
                 )}
               </div>
               <div style={{ marginTop: "20px" }}>
-                <button onClick={handleSnipeTrigger}>Listen on wallet</button>
+                <button onClick={handleSnipeTrigger}>
+                  Listen on {findNameByAddress(dexChoice)}
+                </button>
                 <button onClick={handleSnipeTriggerAll}>
-                  Listen on all wallets
+                  Listen on all dexes
                 </button>
               </div>
             </>
