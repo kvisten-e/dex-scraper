@@ -46,6 +46,9 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
     setCurrentPage(page);
   };
 
+  useEffect(() => {
+    console.log("Track listeing: ", listening)
+  },[listening])
 
   useEffect(() => {
     if (triggerAction) {
@@ -102,7 +105,7 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
             setResult(formatedResult);
           } 
         } else {
-          setListeing(true)
+          
           if (!allDexBool) {
             startScan([wallet]);
           } else {
@@ -411,11 +414,33 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
 
   },[listenerMode])
   
-  const startScan = async (wallets) => {
-    const websockets = wallets.map((wallet, index) => {
-      const websocket = new WebSocket(import.meta.env.VITE_WSS);
+const startScan = async (wallets) => {
+  setListeing(true);
+
+  const createWebSocket = (wallet, index) => {
+    let websocket;
+    let timerId = 0;
+    let reconnectInterval = 5000; // 5 seconds
+    let keepAliveInterval = 20000; // 20 seconds
+
+    const connect = () => {
+      websocket = new WebSocket(import.meta.env.VITE_WSS);
+
+      const keepAlive = () => {
+        if (websocket.readyState === WebSocket.OPEN) {
+          websocket.send("");
+        }
+        timerId = setTimeout(keepAlive, keepAliveInterval);
+      };
+
+      const cancelKeepAlive = () => {
+        if (timerId) {
+          clearTimeout(timerId);
+        }
+      };
 
       websocket.onopen = () => {
+        console.log(`WebSocket connection open for wallet ${wallet}`);
         setLiveConnectionWallets((prevWallets) => [...prevWallets, wallet]);
         const subscribeMessage = JSON.stringify({
           jsonrpc: "2.0",
@@ -431,6 +456,7 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
           ],
         });
         websocket.send(subscribeMessage);
+        keepAlive(); // Start keep-alive mechanism
       };
 
       websocket.onmessage = async (event) => {
@@ -455,20 +481,48 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
 
       function containsSubstring(amount, search) {
         return amount.includes(search);
-      };
+      }
 
-      websocket.onclose = () => {
+      websocket.onclose = (event) => {
+        console.log("listening: ", listening);
         setLiveConnectionWallets((prevWallets) =>
           prevWallets.filter((w) => w !== wallet)
         );
         console.log(`WebSocket connection closed for wallet ${wallet}`);
+        cancelKeepAlive(); // Cancel keep-alive mechanism
+        if (listening) {
+          console.log(
+            `Reconnecting WebSocket for wallet ${wallet} in ${
+              reconnectInterval / 1000
+            } seconds...`
+          );
+          setTimeout(connect, reconnectInterval);
+        }
       };
-      return websocket;
-    });
-    setWs(websockets);
 
-    
+      websocket.onerror = (error) => {
+        console.log("WebSocket error for wallet", wallet , " - ", error);
+        websocket.close();
+      };
+    };
+
+    connect();
+    return websocket;
   };
+
+  const websockets = wallets.map((wallet, index) =>
+    createWebSocket(wallet, index)
+  );
+  setWs(websockets);
+};
+
+
+
+
+  useEffect(() => {
+    console.log("Live changed: ", liveConnectionWallets)
+    console.log("Ws: ", ws, " - ", ws.length)
+  },[liveConnectionWallets])
 
   const stopScan = () => {
     setListeing(false);
@@ -921,11 +975,12 @@ export default function pumpTokens({ minValueProp, maxValueProp, decimalerProp, 
             <div style={styles.listContainer}>
               {allDexBool ? (
                 <div style={styles.header} onClick={toggleList}>
-                  Connections: {ws.length} / {allDexArrFetch.length} 🟢
+                  Connections: {liveConnectionWallets.length} /{" "}
+                  {allDexArrFetch.length} 🟢
                 </div>
               ) : (
                 <div style={styles.header} onClick={toggleList}>
-                  Connections: {ws.length} / 1 🟢
+                  Connections: {liveConnectionWallets.length} / 1 🟢
                 </div>
               )}
               {isOpen && (
