@@ -30,6 +30,11 @@ export default function snipeCreator() {
   const [telegramData, setTelegramData] = useState([])
   const [telegramUsers, setTelegramUsers] = useState([])
   const fetchInitiated = useRef(false);
+  const [listening, setListeing] = useState(false);
+  const [stopScanToggle, setStopScanToggle] = useState(false)
+  const [clearToggle, setClearToggle] = useState(0);
+  const [maxTransactionsToggle, setMaxTransactionsToggle] = useState(true)
+
 
   useEffect(() => {
     fetch("http://127.0.0.1:3000/data")
@@ -124,6 +129,9 @@ export default function snipeCreator() {
     setAlertSound(event.target.checked);
   };
 
+  const handleChangeMaxTransactionToggle = (event) => {
+    setMaxTransactionsToggle(event.target.checked);
+  };
 
   const handleTelegram = (event) => {
     setTelegramToggle(event.target.checked);
@@ -147,6 +155,15 @@ export default function snipeCreator() {
   const changeMaxTransaction = (e) => {
     setMaxTransactionsInWallet(Number(e.target.value)); 
   }
+
+  const stopScan = () => {
+    setStopScanToggle(true)
+    setListeing(false)
+  };
+
+  const clearScan = () => {
+    setClearToggle((prev) => prev + 1); 
+  };
 
   const handleChangeDex = (e) => {
     const trimmedValue = e.target.value.trim();
@@ -177,9 +194,12 @@ export default function snipeCreator() {
 
   const handleSnipeTrigger = () => {
     if (telegramToggle && telegramUsernameIds.length === 0 || telegramLoading === true) {
-
       return
+    } else {
+      setStopScanToggle(false)
+      setListeing(true)
     }
+
     if (inputWallet === '') {
       setAllDex(false)
       setTriggerCount(prev => prev + 1);  
@@ -200,6 +220,9 @@ export default function snipeCreator() {
   const handleSnipeTriggerAll = () => {  
     if (telegramToggle && telegramUsernameIds.length === 0 && telegramLoading === true) {
       return
+    } else {
+      setStopScanToggle(false);
+      setListeing(true)      
     }
 
     setAllDex(true)  
@@ -207,7 +230,8 @@ export default function snipeCreator() {
   }
   
   function findNameByAddress(address) {
-    for (let item of defaultWallets) {
+    const mergedArrays = defaultWallets.concat(savedWallets);
+    for (let item of mergedArrays) {
       if (item.address.trim() === address.trim()) {
         return item.name;
       }
@@ -252,10 +276,20 @@ export default function snipeCreator() {
           <div>
             <h4>Max transactions in wallet</h4>
             <input
-              type="number"
-              value={maxTransactionsInWallet}
-              onChange={changeMaxTransaction}
+              type="checkbox"
+              checked={maxTransactionsToggle}
+              onChange={handleChangeMaxTransactionToggle}
+              style={{ width: "20px", height: "20px" }}
             />
+            {maxTransactionsToggle ? (
+              <input
+                type="number"
+                value={maxTransactionsInWallet}
+                onChange={changeMaxTransaction}
+              />
+            ) : (
+              <></>
+            )}
           </div>
           <div>
             <h4>Select DEX</h4>
@@ -373,6 +407,20 @@ export default function snipeCreator() {
                   Listen on all dexes
                 </button>
               </div>
+              {listening ? (
+                <>
+                  <div
+                    style={{
+                      marginBottom: "10px",
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <button onClick={stopScan}>Stop</button>
+                    <button onClick={clearScan}>Clear</button>
+                  </div>
+                </>
+              ) : null}
             </>
           )}
         </div>
@@ -383,6 +431,7 @@ export default function snipeCreator() {
             decimalerProp={decimaler}
             transactionsAmountProp={transactionsAmount}
             maxTransactionsInWalletProp={maxTransactionsInWallet}
+            maxTransactionsToggle={maxTransactionsToggle}
             dexChoiceProp={dexChoice}
             triggerAction={triggerCount}
             allDex={allDex}
@@ -392,6 +441,9 @@ export default function snipeCreator() {
             alertSound={alertSound}
             telegramUsernameId={telegramUsernameIds}
             telegramToggle={telegramToggle}
+            listening={listening}
+            stopScanToggle={stopScanToggle}
+            clearToggle={clearToggle}
           />
         </div>
       </div>
@@ -399,4 +451,15 @@ export default function snipeCreator() {
   );
 }
 
-
+[
+  { name: "AaZ", address: "AaZkwhkiDStDcgrU37XAj9fpNLrD8Erz5PNkdm4k5hjy" },
+  { name: "G2Y", address: "G2YxRa6wt1qePMwfJzdXZG62ej4qaTC7YURzuh2Lwd3t" },
+  {
+    name: "Fixed float",
+    address: "5ndLnEYqSFiA5yUFHo6LVZ1eWc6Rhh11K5CfJNkoHEPs",
+  },
+  {
+    name: "PumpSkapare",
+    address: "2wm6N1kL4feGpVHPaCaYb2FJfFoVAdAXuwptexaJuGUb",
+  },
+];
