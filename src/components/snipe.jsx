@@ -103,6 +103,7 @@ export default function pumpTokens({
               decimaler,
               wallet,
               maxTransactionsInWallet,
+              maxTransactionsToggle,
               transactionsAmount
             );
           } else {
@@ -112,6 +113,7 @@ export default function pumpTokens({
               decimaler,
               allDexArrFetch,
               maxTransactionsInWallet,
+              maxTransactionsToggle,
               transactionsAmount
             );
           }
@@ -153,9 +155,9 @@ export default function pumpTokens({
         transactionsAmount
       ) {
         const rotateRPC = createRPCRotator();
-
         const loops = parseInt(transactionsAmount) / 1000;
         let signatureValue = [];
+
         if (typeof walletNew === "object") {
           setTotalWallets(walletNew.length);
           for (let wallet of walletNew) {
@@ -178,7 +180,6 @@ export default function pumpTokens({
           }
         } else {
           const transactions = await getTransactionsNew(wallet, loops);
-
           signatureValue = await getSignatureValue(
             walletNew,
             transactions,
