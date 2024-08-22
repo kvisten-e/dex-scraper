@@ -23,6 +23,7 @@ export default function pumpTokens({
   stopScanToggle,
   clearToggle,
   maxTransactionsToggleProp,
+  decimalsTypeProp,
 }) {
   const { params } = useContext(GlobalContext);
   const { signal } = useContext(GlobalContext);
@@ -55,7 +56,7 @@ export default function pumpTokens({
   const itemsPerPage = 20;
   const totalPages = Math.ceil(logs.length / itemsPerPage);
   const [liveConnectionWallets, setLiveConnectionWallets] = useState([]);
-
+  const [decimalsType, setDecimalsType] = useState();
   const toggleList = () => {
     setIsOpen(!isOpen);
   };
@@ -104,7 +105,8 @@ export default function pumpTokens({
               wallet,
               maxTransactionsInWallet,
               maxTransactionsToggle,
-              transactionsAmount
+              transactionsAmount,
+              decimalsType
             );
           } else {
             result = await snipare(
@@ -114,7 +116,8 @@ export default function pumpTokens({
               allDexArrFetch,
               maxTransactionsInWallet,
               maxTransactionsToggle,
-              transactionsAmount
+              transactionsAmount,
+              decimalsType
             );
           }
           let formatedResult = removeDuplicates(result);
@@ -152,7 +155,8 @@ export default function pumpTokens({
         walletNew,
         maxTransactionsInWalletNew,
         maxTransactionsToggleNew,
-        transactionsAmount
+        transactionsAmount,
+        decimalType
       ) {
         const rotateRPC = createRPCRotator();
         const loops = parseInt(transactionsAmount) / 1000;
@@ -172,7 +176,8 @@ export default function pumpTokens({
               minValueNew,
               maxValueNew,
               decimalerNew,
-              wallet.name
+              wallet.name,
+              decimalType
             );
             let index = walletNew.indexOf(wallet) + 1;
             setCompletedDexes(index);
@@ -186,7 +191,8 @@ export default function pumpTokens({
             minValueNew,
             maxValueNew,
             decimalerNew,
-            null
+            null,
+            decimalType
           );
         }
 
@@ -198,7 +204,7 @@ export default function pumpTokens({
             const result = await getWalletTransactions(eachWallet.wallet);
             if (maxTransactionsToggleNew === false) {
               return signatureValue;
-            }            
+            }
             if (result.length <= maxTransactionsInWalletNew) {
               return eachWallet;
             }
@@ -242,10 +248,28 @@ export default function pumpTokens({
           min_amount,
           max_amount,
           decimaler,
-          dex
+          dex,
+          decimalType
         ) {
           let confirmedTransactionList = [];
           let id = 1;
+
+          let compareDecimals;
+
+          switch (decimalType) {
+            case "Max":
+              compareDecimals = (deci, decimaler) => deci <= decimaler;
+              break;
+            case "Min":
+              compareDecimals = (deci, decimaler) => deci >= decimaler;
+              break;
+            case "Strict":
+              compareDecimals = (deci, decimaler) => deci == decimaler;
+              break;
+            default:
+              throw new Error("Invalid decimal type");
+          }
+
           try {
             const BATCH_SIZE = 20;
             for (let i = 0; i < list.length; i += BATCH_SIZE) {
@@ -284,7 +308,7 @@ export default function pumpTokens({
                         if (
                           transferAmount >= min_amount &&
                           transferAmount <= max_amount &&
-                          deci <= decimaler
+                          compareDecimals(deci, decimaler)
                         ) {
                           const time = getFormattedDate(
                             transactionDetails.blockTime
@@ -473,6 +497,7 @@ export default function pumpTokens({
     setAllDexBoolFetch(allDexArr);
     setButtonClickCounter((prev) => prev + 1);
     setTriggerActionProp(triggerAction);
+    setDecimalsType(decimalsTypeProp);
   }, [triggerAction]);
 
   useEffect(() => {
@@ -695,9 +720,7 @@ export default function pumpTokens({
         return signatureValue;
       }
 
-      if (
-        result.length <= maxTransactionsInWalletNew
-      ) {
+      if (result.length <= maxTransactionsInWalletNew) {
         return signatureValue;
       }
     }

@@ -34,7 +34,13 @@ export default function snipeCreator() {
   const [stopScanToggle, setStopScanToggle] = useState(false)
   const [clearToggle, setClearToggle] = useState(0);
   const [maxTransactionsToggle, setMaxTransactionsToggle] = useState(true)
+  const [decimalsType, setDecimalsType] = useState(() => localStorage.getItem('decimalType') || 'Max')
 
+const decimalsTypeArr = [
+  { address: "Max", name: "Max" },
+  { address: "Min", name: "Min" },
+  { address: "Strict", name: "Strict" },
+];
 
   useEffect(() => {
     fetch("http://127.0.0.1:3000/data")
@@ -77,7 +83,8 @@ export default function snipeCreator() {
     localStorage.setItem("telegramUsername", telegramUsername);
     localStorage.setItem('transactionsAmount', transactionsAmount);
     localStorage.setItem('maxTransactionsInWallet', maxTransactionsInWallet);
-  }, [minValue, maxValue, decimaler, transactionsAmount, maxTransactionsInWallet, telegramUsername])
+    localStorage.setItem("decimalType", decimalsType);
+  }, [minValue, maxValue, decimaler, transactionsAmount, maxTransactionsInWallet, telegramUsername, decimalsType])
 
 
   useEffect(() => {
@@ -169,6 +176,9 @@ export default function snipeCreator() {
     const trimmedValue = e.target.value.trim();
     setDexChoice(trimmedValue);
   }
+  const handleChangedecimalsType = (e) => {
+     setDecimalsType(e.target.value.trim());
+   }; 
 
 
   const checkAddress = (valueButton) => {
@@ -264,6 +274,13 @@ export default function snipeCreator() {
           <div>
             <h4>SOL decimals</h4>
             <input type="number" value={decimaler} onChange={changeDecimaler} />
+            <select value={decimalsType} onChange={handleChangedecimalsType}>
+              {decimalsTypeArr.map((option, index) => (
+                <option key={index} value={option.address}>
+                  {option.name}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <h4>Amount include (example: .03)</h4>
@@ -444,6 +461,7 @@ export default function snipeCreator() {
             listening={listening}
             stopScanToggle={stopScanToggle}
             clearToggle={clearToggle}
+            decimalsTypeProp={decimalsType}
           />
         </div>
       </div>
@@ -451,15 +469,3 @@ export default function snipeCreator() {
   );
 }
 
-[
-  { name: "AaZ", address: "AaZkwhkiDStDcgrU37XAj9fpNLrD8Erz5PNkdm4k5hjy" },
-  { name: "G2Y", address: "G2YxRa6wt1qePMwfJzdXZG62ej4qaTC7YURzuh2Lwd3t" },
-  {
-    name: "Fixed float",
-    address: "5ndLnEYqSFiA5yUFHo6LVZ1eWc6Rhh11K5CfJNkoHEPs",
-  },
-  {
-    name: "PumpSkapare",
-    address: "2wm6N1kL4feGpVHPaCaYb2FJfFoVAdAXuwptexaJuGUb",
-  },
-];
