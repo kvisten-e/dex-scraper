@@ -596,7 +596,8 @@ export default function pumpTokens({
               maxTransactionsInWallet,
               maxTransactionsToggle,
               response.params.result.value.signature,
-              [wallet]
+              [wallet],
+              decimalsType
             );
             if (parseFloat(amountInclude) > 0) {
               result = result.filter((obj) =>
@@ -700,7 +701,8 @@ export default function pumpTokens({
     maxTransactionsInWalletNew,
     maxTransactionsToggleNew,
     signature,
-    wallet
+    wallet,
+    decimalType
   ) {
     const rotateRPC = createRPCRotator();
 
@@ -710,7 +712,8 @@ export default function pumpTokens({
       signature,
       minValueNew,
       maxValueNew,
-      decimalerNew
+      decimalerNew,
+      decimalType
     );
 
     if (signatureValue.length > 0) {
@@ -751,7 +754,8 @@ export default function pumpTokens({
       signature,
       min_amount,
       max_amount,
-      decimaler
+      decimaler,
+      decimalType
     ) {
       let confirmedTransactionList = [];
       try {
@@ -769,16 +773,15 @@ export default function pumpTokens({
             );
 
             if (transactionDetails !== null) {
-              break; // Exit loop if transactionDetails is successfully fetched
+              break;
             }
           } catch (error) {
             if (attempt === retries - 1) {
-              throw error; // Throw error if this was the last attempt
+              throw error;
             }
           }
 
-          // Optionally, you can add a delay between retries
-          await new Promise((resolve) => setTimeout(resolve, 1000)); // 1-second delay
+          await new Promise((resolve) => setTimeout(resolve, 1000)); 
         }
 
         if (transactionDetails === null) {
@@ -787,9 +790,29 @@ export default function pumpTokens({
           );
         }
 
+
+          
         if (transactionDetails) {
+
           for (const instruction of transactionDetails.transaction.message
             .instructions) {
+            
+            let compareDecimals;
+
+            switch (decimalType) {
+              case "Max":
+                compareDecimals = (deci, decimaler) => deci <= decimaler;
+                break;
+              case "Min":
+                compareDecimals = (deci, decimaler) => deci >= decimaler;
+                break;
+              case "Strict":
+                compareDecimals = (deci, decimaler) => deci == decimaler;
+                break;
+              default:
+                throw new Error("Invalid decimal type");
+            }            
+            
             if (
               instruction.programId.toBase58() ===
                 SystemProgram.programId.toBase58() &&
@@ -805,7 +828,7 @@ export default function pumpTokens({
                 if (
                   transferAmount >= min_amount &&
                   transferAmount <= max_amount &&
-                  deci <= decimaler
+                  compareDecimals(deci, decimaler)
                 ) {
                   const time = getFormattedDate(transactionDetails.blockTime);
                   confirmedTransactionList.push({
