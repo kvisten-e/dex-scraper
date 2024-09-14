@@ -338,17 +338,19 @@ export default function pumpTokens({
           let response;
           for (let i = 1; i <= loops; i++) {
             if (i > 1) {
-              response = await rotateRPC().getConfirmedSignaturesForAddress2(
+              console.log("Inne: " , i)
+              response = await rotateRPC().getSignaturesForAddress(
                 getPublickey(wallet),
                 { before: lastSignature }
               );
             } else {
-              response = await rotateRPC().getConfirmedSignaturesForAddress2(
+              response = await rotateRPC().getSignaturesForAddress(
                 getPublickey(wallet)
               );
             }
 
             if (response && response.length > 0) {
+              console.log("Response: ", response)
               signatures = signatures.concat(response);
               lastSignature = response[response.length - 1].signature;
             } else {
@@ -392,7 +394,29 @@ export default function pumpTokens({
         }
 
         function createRPCRotator() {
-          const RPCs = [import.meta.env.VITE_RPC_3, import.meta.env.VITE_RPC_4];
+                const RPCs = [
+                  import.meta.env.VITE_RPC_1,
+                  import.meta.env.VITE_RPC_2,
+                  import.meta.env.VITE_RPC_3,
+                  import.meta.env.VITE_RPC_4,
+                  import.meta.env.VITE_RPC_5,
+                  import.meta.env.VITE_RPC_6,
+                  import.meta.env.VITE_RPC_7,
+                  import.meta.env.VITE_RPC_8,
+                  import.meta.env.VITE_RPC_9,
+                  import.meta.env.VITE_RPC_10,
+                  import.meta.env.VITE_RPC_11,
+                  import.meta.env.VITE_RPC_12,
+                  import.meta.env.VITE_RPC_13,
+                  import.meta.env.VITE_RPC_14,
+                  import.meta.env.VITE_RPC_15,
+                  import.meta.env.VITE_RPC_16,
+                  import.meta.env.VITE_RPC_17,
+                  import.meta.env.VITE_RPC_18,
+                  import.meta.env.VITE_RPC_19,
+                  import.meta.env.VITE_RPC_20,
+                  import.meta.env.VITE_RPC_21,
+                ];
           return function () {
             RPCs.push(RPCs.shift());
             return new web3.Connection(RPCs[0], "confirmed");
@@ -854,7 +878,12 @@ export default function pumpTokens({
     }
 
     function createRPCRotator() {
-      const RPCs = [import.meta.env.VITE_RPC_3, import.meta.env.VITE_RPC_4];
+      const RPCs = [
+        import.meta.env.VITE_RPC_1,
+        import.meta.env.VITE_RPC_2,
+        import.meta.env.VITE_RPC_3,
+        import.meta.env.VITE_RPC_4,
+      ];
       return function () {
         RPCs.push(RPCs.shift());
         return new web3.Connection(RPCs[0], "confirmed");

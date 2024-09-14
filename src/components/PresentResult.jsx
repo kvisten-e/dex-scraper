@@ -104,9 +104,29 @@ export default function PresentResult(props) {
 
               function createRPCRotator() {
                 const RPCs = [
+                  import.meta.env.VITE_RPC_1,
+                  import.meta.env.VITE_RPC_2,
                   import.meta.env.VITE_RPC_3,
                   import.meta.env.VITE_RPC_4,
+                  import.meta.env.VITE_RPC_5,
+                  import.meta.env.VITE_RPC_6,
+                  import.meta.env.VITE_RPC_7,
+                  import.meta.env.VITE_RPC_8,
+                  import.meta.env.VITE_RPC_9,
+                  import.meta.env.VITE_RPC_10,
+                  import.meta.env.VITE_RPC_11,
+                  import.meta.env.VITE_RPC_12,
+                  import.meta.env.VITE_RPC_13,
+                  import.meta.env.VITE_RPC_14,
+                  import.meta.env.VITE_RPC_15,
+                  import.meta.env.VITE_RPC_16,
+                  import.meta.env.VITE_RPC_17,
+                  import.meta.env.VITE_RPC_18,
+                  import.meta.env.VITE_RPC_19,
+                  import.meta.env.VITE_RPC_20,
+                  import.meta.env.VITE_RPC_21,
                 ];
+
                 return function () {
                   RPCs.push(RPCs.shift());
                   return new web3.Connection(RPCs[0], "confirmed");
