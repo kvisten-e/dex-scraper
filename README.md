@@ -32,8 +32,3 @@ This project is currently in development. Significant progress has been made, bu
 3. Navigate to the project directory and install the dependencies with `npm install`.
 4. Set up a .env file with your RPCS ex. VITE_RPC_3 = "" & VITE_RPC_4 = ""
 5. Start the development server with `npm run dev`.
-
-
-## Disclaimer
-
-Please note that this tool is intended for research and educational purposes only. Users should conduct their own due diligence before engaging in cryptocurrency trading.
