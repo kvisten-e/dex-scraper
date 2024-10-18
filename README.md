@@ -1,7 +1,9 @@
 # Dex-Scraper (BETA)
 
-## Overview
+##Disclaimer
+The code has been written in an exploratory and experimental phase without having undergone refinement. Please consider it as such.
 
+## Overview
 The Solana Token Discovery Tool is a cutting-edge React application designed to automate the exploration and identification of potentially lucrative tokens soon to be traded on the Solana blockchain. By scraping decentralized and centralized exchanges (DEX/CEX) for wallet addresses that have received Solana (SOL), this tool meticulously tracks these wallets. It further investigates each discovered wallet to determine if they have distributed Solana to other wallets, providing an early insight into new tokens poised for trading.
 
 ## Key Features
