@@ -1,6 +1,6 @@
 # Dex-Scraper (BETA)
 
-##Disclaimer
+## Disclaimer
 The code has been written in an exploratory and experimental phase without having undergone refinement. Please consider it as such.
 
 ## Overview
