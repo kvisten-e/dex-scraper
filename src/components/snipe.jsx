@@ -575,7 +575,8 @@ export default function pumpTokens({
       let keepAliveInterval = 20000; // 20 seconds
 
       const connect = () => {
-        websocket = new WebSocket(import.meta.env.VITE_WSS);
+
+        websocket = new WebSocket(import.meta.env.VITE_HELIUS_WSS);
 
         const keepAlive = () => {
           if (websocket.readyState === WebSocket.OPEN) {
@@ -931,6 +932,9 @@ export default function pumpTokens({
 
       return 0;
     }
+
+
+
   }
 
   function findNameByAddress(address) {
@@ -952,6 +956,13 @@ export default function pumpTokens({
     audio.play().catch((error) => {
       console.error("Error playing audio:", error);
     });
+  }
+
+  function getRandomWss() {
+    const randomNumber = Math.floor(Math.random() * 10) + 1;
+    const viteString = `VITE_RPC_${randomNumber}`;
+    const wss = import.meta.env[viteString];
+    return wss;
   }
 
   const styles = {
